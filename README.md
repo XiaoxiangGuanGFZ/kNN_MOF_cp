@@ -3,4 +3,4 @@ k-nearest resampling (kNN) and method-of-fragments (MOF) based rainfall temporal
 ## To-do list
 - csv data import and export functions
 - functions on date series
-- 
+- temporal aggregation (hourly2daily)
