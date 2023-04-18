@@ -1,0 +1,25 @@
+#--------------------------
+# global parameters
+#-------------------
+
+# ------- disaggregation setup ---------
+# -- daily data to be disaggregated
+FP_DAILY,D:/kNN_MOF_cp/data/rr_daily.txt
+START_YEAR,1950
+START_MONTH,1
+STARY_DAY,1
+
+# the file path and name of the circulation pattern classification data
+FP_CP,D:/kNN_MOF_cp/data/cp_series.txt
+# the file path and name of the observed hourly rainfall data
+FP_HOURLY,D:/kNN_MOF_cp/data/rr_obs_hourly.txt
+
+# ------- the parameters in kNN_MOF_cp algorithm ---------
+# number of the rain stations
+N_STATION,300
+T_CP,TRUE
+SEASON,TRUE
+CONTINUITY,1
+
+
+
