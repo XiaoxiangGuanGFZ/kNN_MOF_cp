@@ -1,9 +1,9 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
-#define MAXCHAR 1000
+#define MAXCHAR 2000
 
 int main(){
 
@@ -25,7 +25,7 @@ int import_df_cp(
     int ncol,
     int df[][5] 
 ) {
-    /*
+    /*********************
     main function:
         import the circulation pattern classification results as an array
     parameters:
@@ -34,7 +34,7 @@ int import_df_cp(
         ncol: the number of columns in the data file
     output:
         return an array (int type) with the size of nrow*ncol
-    */
+    *********************/
     FILE *fp;
     char row[MAXCHAR];
     char *token;
@@ -49,7 +49,9 @@ int import_df_cp(
     j = 0;  // from the first row 
     while (!feof(fp))
     {
-        fgets(row, MAXCHAR, fp);  // the fgets() function comes from <stdbool.h>
+        // the fgets() function comes from <stdbool.h>
+        // Reads characters from stream and stores them as a C string
+        fgets(row, MAXCHAR, fp); 
         if (j==0) {
             printf("Row: %s", row);
         }
@@ -59,16 +61,60 @@ int import_df_cp(
         strtok() fucntion: https://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
         */
         for (i=0; i < ncol; i++) {
-            df[j][i] = atoi(token);  // the function atoi() comes from <stdlib.h>
+            // the function atoi() comes from <stdlib.h>
+            // convert string into integer
+            // atof():	Convert string to double
+            df[j][i] = atoi(token);  
             token = strtok(NULL, ",");  // the function strtok() comes from <string.h>
         }
-        //while(token != NULL)
-        //{
-        //    printf("Token: %s\n", token);
-        //    token = strtok(NULL, ",");
-        // }
         j=j+1;
     }
     fclose(fp);
     return 0;
+}
+
+void import_global(
+    char fname[100]
+){
+    /**************
+     * import the global parameters into memory for disaggregation algorithm
+     * 
+     * -- Parameters:
+     *      fname: a string (1-D character array), file path and name of the global parameters
+     * -- Output:
+     *      return a structure containing the key fields
+     * ********************/
+    FILE *fp;
+    int j;
+    char row[MAXCHAR];  // a row (string) read from file
+    char *token;
+
+    if ((fp=fopen(fname, "r")) == NULL) {
+        printf("cannot open file\n");
+        exit(0);
+    }
+    j = 0;  // from the first row 
+    while (!feof(fp))
+    {
+        // the fgets() function comes from <stdbool.h>
+        // Reads characters from stream and stores them as a C string
+        fgets(row, MAXCHAR, fp); 
+        if (j==0) {
+            printf("Row: %s", row);
+        }
+        
+        token = strtok(row, ",");  
+        /*
+        strtok() fucntion: https://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
+        */
+        for (i=0; i < ncol; i++) {
+            // the function atoi() comes from <stdlib.h>
+            // convert string into integer
+            df[j][i] = atoi(token);  
+            token = strtok(NULL, ",");  // the function strtok() comes from <string.h>
+        }
+        j=j+1;
+    }
+    fclose(fp);
+
 }
