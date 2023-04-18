@@ -39,6 +39,7 @@ int import_df_cp(
     char row[MAXCHAR];
     char *token;
     int i, j;  // the index for the col and row: for iteration
+        
     // int df[nrow][5];  // predefine the output CP array
     // char fname[50] = "D:\\kNN_MOF_cp\\data\\Book1.csv";
     if ((fp=fopen(fname, "r")) == NULL) {
