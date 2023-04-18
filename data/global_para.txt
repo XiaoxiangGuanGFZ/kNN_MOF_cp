@@ -7,7 +7,7 @@
 FP_DAILY,D:/kNN_MOF_cp/data/rr_daily.txt
 START_YEAR,1950
 START_MONTH,1
-STARY_DAY,1
+START_DAY,1
 
 # the file path and name of the circulation pattern classification data
 FP_CP,D:/kNN_MOF_cp/data/cp_series.txt
