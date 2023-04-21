@@ -19,9 +19,13 @@ struct Para_global
         int CONTINUITY;
     };
 
-void main() {
-    char fname[100] = "D:/kNN_MOF_cp/data/global_para.txt";
-    // this should be the only extern input for this program
+void main(int argc, char * argv[]) {
+    /*
+    int argc: the number of parameters of main() function;
+    char *argv[]: pointer array
+    */
+    /* char fname[100] = "D:/kNN_MOF_cp/data/global_para.txt";
+        this should be the only extern input for this program */
     struct Para_global Para_df = {
         "D:/kNN_MOD_cp/data/test_rr_daily.txt",
         "D:/kNN_MOF_cp/data/test_cp_series.txt",
@@ -37,7 +41,12 @@ void main() {
     struct Para_global * pp;
     pp = &Para_df;
     void import_global(char fname[], struct Para_global *pp);  // function declaration
-    import_global(fname, pp);  // import the global parameters
+    /* import the global parameters 
+    parameter from main() function, pointer array
+    argv[0]: pointing to the first string from command line (the executable file)
+    argv[1]: pointing to the second string (parameter): file path and name of global parameter file.
+    */
+    import_global(*(++argv), pp);  
     /******* import circulation pattern series *********/
     int df_cp[100000][4];
     int nrow_cp, ncol_cp = 4;  // the number of CP data columns: 4 (y, m, d, cp)
