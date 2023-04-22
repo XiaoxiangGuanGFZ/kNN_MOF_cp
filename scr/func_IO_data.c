@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define MAXCHAR 2000
+#define MAXCHAR 4000
 
 // int main(){
 //     char fname[50] = "D:\\kNN_MOF_cp\\data\\cp_series.txt";
