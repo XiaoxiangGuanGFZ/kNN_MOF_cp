@@ -48,12 +48,18 @@ void main(int argc, char * argv[]) {
     */
     import_global(*(++argv), pp);  
     /******* import circulation pattern series *********/
-    int df_cp[100000][4];
-    int nrow_cp, ncol_cp = 4;  // the number of CP data columns: 4 (y, m, d, cp)
-    nrow_cp = import_df_cp(Para_df.FP_CP, ncol_cp, df_cp);
-    printf("------ Import CP data series (Done) ------ \n");
-    printf("* the first row: %d,%d,%d,%d \n", df_cp[0][0], df_cp[0][1], df_cp[0][2], df_cp[0][3]);
-    printf("* number of CP data rows: %d\n", nrow_cp);
+    if (strcmp(pp->T_CP, "TRUE") == 0) {
+        int df_cp[100000][4];
+        int nrow_cp, ncol_cp = 4;  // the number of CP data columns: 4 (y, m, d, cp)
+        nrow_cp = import_df_cp(Para_df.FP_CP, ncol_cp, df_cp);
+        printf("------ Import CP data series (Done) ------ \n");
+        printf("* the first row: %d,%d,%d,%d \n", df_cp[0][0], df_cp[0][1], df_cp[0][2], df_cp[0][3]);
+        printf("* number of CP data rows: %d\n", nrow_cp);
+    } else {
+        int df_cp=0;
+        printf("------ Disaggregation conditioned only on seasonality (12 months) ------ \n");
+    }
+    
     /****** import hourly rainfall data (obs as fragments) *******/
 
 }
