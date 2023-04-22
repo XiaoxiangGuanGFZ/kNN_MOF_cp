@@ -3,7 +3,18 @@
 #include <string.h>
 #include "func_IO_data.c"
 
-# define MAXCHAR 2000
+# define MAXCHAR 4000
+struct Date {
+    int y;
+    int m;
+    int d;
+};
+struct df_rr_d
+{
+    /* data */
+    struct Date date;    
+    double *p_rr;
+};
 struct Para_global
     {
         /* global parameters */
@@ -59,7 +70,35 @@ void main(int argc, char * argv[]) {
         int df_cp=0;
         printf("------ Disaggregation conditioned only on seasonality (12 months) ------ \n");
     }
+    /****** import daily rainfall data (to be disaggregated) *******/
+    int import_dfrr_d(
+        char FP_daily[], 
+        int N_STATION,
+        struct df_rr_d *p_rr_d
+    );  // declare
+    struct df_rr_d df_rr_daily[10000];
+    int nrow_rr_d;
+    nrow_rr_d = import_dfrr_d(
+        Para_df.FP_DAILY, 
+        Para_df.N_STATION,
+        df_rr_daily
+    );
+    printf("------ Import daily rr data (Done) ------ \n");
+    printf("* the total rows: %d\n", nrow_rr_d);
+    printf("* the first day: %d-%d-%d\n", df_rr_daily[0].date.y,df_rr_daily[0].date.m,df_rr_daily[0].date.d);
+    printf(
+        "* the last day: %d-%d-%d\n", 
+        df_rr_daily[nrow_rr_d-1].date.y,df_rr_daily[nrow_rr_d-1].date.m,df_rr_daily[nrow_rr_d-1].date.d
+    );
     
+    // int i,j;
+    // for (i=0;i < 10;i++) {
+    //     printf("\ndate: %d-%d-%d: \n", df_rr_daily[i].date.y, df_rr_daily[i].date.m, df_rr_daily[i].date.d);
+    //     for (j=0; j < Para_df.N_STATION; j++) {
+    //         printf("%3.1f,", *((df_rr_daily[i]).p_rr+j));
+    //     }
+    // }
+
     /****** import hourly rainfall data (obs as fragments) *******/
 
 }
@@ -150,3 +189,40 @@ void import_global(
     );
 }
 
+int import_dfrr_d(
+    char FP_daily[], 
+    int N_STATION,
+    struct df_rr_d *p_rr_d
+) {
+    /******************
+    
+    *******************/
+    // char FP_daily[]="D:/kNN_MOF_cp/data/rr_obs_daily.csv";  // key parameter
+    FILE *fp_d;
+    if ((fp_d=fopen(FP_daily, "r")) == NULL) {
+        printf("Cannot open daily rr obs data file!\n");
+        exit(0);
+    }
+    // struct df_rr_d df_rr_daily[10000];
+    char *token;
+    char row[MAXCHAR];
+    int i, j, nrow;
+    // int N_STATION = 134;  // key parameter
+
+    i=0;
+    while (!feof(fp_d)) {
+        fgets(row, MAXCHAR, fp_d);
+        (p_rr_d + i)->date.y = atoi(strtok(row, ","));  //df_rr_daily[i].
+        (p_rr_d + i)->date.m = atoi(strtok(NULL, ","));
+        (p_rr_d + i)->date.d = atoi(strtok(NULL, ","));
+        (p_rr_d + i)->p_rr = (double *)malloc(N_STATION * sizeof(double));
+        
+        for (j=0; j < N_STATION; j++){
+            token = strtok(NULL, ",");
+            *((p_rr_d + i)->p_rr + j) = atof(token);
+        }
+        i=i+1;
+    }
+    nrow = i;
+    return nrow;
+}
