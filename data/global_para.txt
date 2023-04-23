@@ -14,7 +14,7 @@ FP_CP,D:/kNN_MOF_cp/data/cp_series.csv
 FP_HOURLY,D:/kNN_MOF_cp/data/rr_obs_hourly.csv
 
 # the file path to store the disaggregated hourly rr results
-FP_OUT,D:/kNN_MOF_cp/output/
+FP_OUT,D:/kNN_MOF_cp/output/rr_sim_hourly.csv
 
 FP_LOG,D:/kNN_MOF_cp/my_disaggregation.log
 
@@ -32,11 +32,11 @@ T_CP,TRUE
 # winter: from November to next April (11-4)
 SEASON,TRUE
 
-# the CONTINUITY in candidates filtering; 
+# the CONTINUITY in candidates filtering; 1 or 3
 CONTINUITY,1
 
 # the flexibility level of wet-dry status in candidates filtering
 # WD:0 very strict, only the candidates with exact the same wet-dry status of target day can be selected
 # WD:1 flexible, the candidates with same wet-dry status covering that of target day will be selected
-WD,0
+WD,1
 
