@@ -38,13 +38,13 @@ struct Para_global
         char FP_DAILY[100];
         char FP_CP[100];
         char FP_HOURLY[100];
-        int START_YEAR;
-        int START_MONTH;
-        int START_DAY;
+        char FP_OUT[100];
+        char FP_LOG[100];
         int N_STATION;
         char T_CP[10];
         char SEASON[10];
         int CONTINUITY;
+        int WD;
     };
 
 void main(int argc, char * argv[]) {
@@ -58,13 +58,13 @@ void main(int argc, char * argv[]) {
         "D:/kNN_MOD_cp/data/test_rr_daily.txt",
         "D:/kNN_MOF_cp/data/test_cp_series.txt",
         "D:/kNN_MOF_cp/data/test_rr_obs_hourly.txt",
-        1970,
-        5,
-        21,
-        15,
+        "D:/kNN_MOF_cp/output/",
+        "D:/kNN_MOF_cp/my_disaggregation.log",
+        134,
         "TRUE",
         "TRUE",
-        1
+        1,
+        0
     };  // define the parameter structure and initialization
     struct Para_global * pp;
     pp = &Para_df;
@@ -194,12 +194,12 @@ void import_global(
                     strcpy(pp->T_CP, token2);
                 } else if (strcmp(token, "N_STATION") == 0) {
                     pp->N_STATION = atoi(token2);
-                } else if (strcmp(token, "START_YEAR") == 0) {
-                    pp->START_YEAR = atoi(token2);
-                } else if (strcmp(token, "START_MONTH") == 0) {
-                    pp->START_MONTH = atoi(token2);
-                } else if (strcmp(token, "START_DAY") == 0) {
-                    pp->START_DAY = atoi(token2);
+                } else if (strcmp(token, "WD") == 0) {
+                    pp->WD = atoi(token2);
+                } else if (strcmp(token, "FP_OUT") == 0) {
+                    strcpy(pp->FP_OUT, token2);
+                } else if (strcmp(token, "FP_LOG") == 0) {
+                    strcpy(pp->FP_LOG, token2);
                 } else if (strcmp(token, "CONTINUITY") == 0) {
                     pp->CONTINUITY = atoi(token2);   
                 } else {
@@ -208,20 +208,19 @@ void import_global(
                     );
                     exit(0);
                 }
-                
             }
         }
     }
     fclose(fp);
     printf("------ Global parameter import completed: -----\n");
     printf(
-        "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP: %s\nSTART_YEAR: %d\tSTART_MONTH: %d\tSTART_DAY: %d\n",
-        pp->FP_DAILY, pp->FP_HOURLY, pp->FP_CP, pp->START_YEAR, pp->START_MONTH, pp->START_DAY
+        "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP: %s\nFP_OUT: %s\nFP_LOG: %s\n",
+        pp->FP_DAILY, pp->FP_HOURLY, pp->FP_CP, pp->FP_OUT, pp->FP_LOG
     );
     printf("------ Disaggregation parameters: -----\n");
     printf(
-        "T_CP: %s\nSEASON: %s\nN_STATION: %d\nCONTINUITY: %d\n",
-        pp->T_CP, pp->SEASON, pp->N_STATION, pp->CONTINUITY
+        "T_CP: %s\nSEASON: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\n",
+        pp->T_CP, pp->SEASON, pp->N_STATION, pp->CONTINUITY, pp->WD
     );
 }
 
@@ -267,6 +266,7 @@ int import_dfrr_d(
         i=i+1;
     }
     nrow = i;
+    fclose(fp_d);
     // int i,j;
     // for (i=0;i < 10;i++) {
     //     printf("\ndate: %d-%d-%d: \n", df_rr_daily[i].date.y, df_rr_daily[i].date.m, df_rr_daily[i].date.d);
@@ -329,6 +329,7 @@ int import_dfrr_h(
         }
         i=i+1;
     }
+    fclose(fp_h);
     nrow_total = i;  // the total number of row in the data file
     ndays = p_df_rr_h - p_rr_h;  // the exact size of struct p_rr_h array
     /**** aggregate the hourly rr into daily scale ****/
@@ -402,3 +403,4 @@ int import_df_cp(
     fclose(fp_cp);
     return j;  // the number of rows
 }
+
