@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
-#include "func_IO_data.c"
 
 # define MAXCHAR 4000
+# define MAXrow 20000  // almost 100 years long ts
+
 struct Date {
     int y;
     int m;
@@ -21,6 +23,13 @@ struct df_rr_h
     struct Date date;    
     double (*rr_h)[24];
     double *rr_d;
+};
+
+struct df_cp
+{
+    /* data */
+    struct Date date;    
+    int cp;
 };
 
 struct Para_global
@@ -67,13 +76,22 @@ void main(int argc, char * argv[]) {
     */
     import_global(*(++argv), pp);  
     /******* import circulation pattern series *********/
+    int import_df_cp(
+        char fname[],
+        struct df_cp *p_df_cp
+    );
     if (strcmp(pp->T_CP, "TRUE") == 0) {
-        int df_cp[100000][4];
-        int nrow_cp, ncol_cp = 4;  // the number of CP data columns: 4 (y, m, d, cp)
-        nrow_cp = import_df_cp(Para_df.FP_CP, ncol_cp, df_cp);
+        // int df_cps[100000][4];
+        struct df_cp df_cps[MAXrow];
+        int nrow_cp;  // the number of CP data columns: 4 (y, m, d, cp)
+        nrow_cp = import_df_cp(Para_df.FP_CP, df_cps);
         printf("------ Import CP data series (Done) ------ \n");
-        printf("* the first row: %d,%d,%d,%d \n", df_cp[0][0], df_cp[0][1], df_cp[0][2], df_cp[0][3]);
         printf("* number of CP data rows: %d\n", nrow_cp);
+        printf("* the first day: %d-%d-%d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
+        printf("* the last day: %d-%d-%d \n", 
+            df_cps[nrow_cp-1].date.y, df_cps[nrow_cp-1].date.m, df_cps[nrow_cp-1].date.d
+        );
+        
     } else {
         int df_cp=0;
         printf("------ Disaggregation conditioned only on seasonality (12 months) ------ \n");
@@ -84,7 +102,7 @@ void main(int argc, char * argv[]) {
         int N_STATION,
         struct df_rr_d *p_rr_d
     );  // declare
-    struct df_rr_d df_rr_daily[10000];
+    struct df_rr_d df_rr_daily[MAXrow];
     int nrow_rr_d;
     nrow_rr_d = import_dfrr_d(
         Para_df.FP_DAILY, 
@@ -106,7 +124,7 @@ void main(int argc, char * argv[]) {
         struct df_rr_h *p_rr_h
     );
     int ndays_h;
-    struct df_rr_h df_rr_hourly[10000];
+    struct df_rr_h df_rr_hourly[MAXrow];
     ndays_h = import_dfrr_h(Para_df.FP_HOURLY, Para_df.N_STATION, df_rr_hourly);
     printf("------ Import hourly rr data (Done) ------ \n");
     printf("* total hourly obs days: %d\n", ndays_h);
@@ -116,7 +134,7 @@ void main(int argc, char * argv[]) {
         df_rr_hourly[ndays_h-1].date.y, df_rr_hourly[ndays_h-1].date.m, df_rr_hourly[ndays_h-1].date.d
     );
     /****** Disaggregation: kNN_MOF_cp *******/
-    
+
 
 
 }
@@ -340,4 +358,47 @@ int import_dfrr_h(
     //     printf("%3.1f\t", p_df_rr_h->rr_d[j]);
     // }
     return ndays;
+}
+
+int import_df_cp(
+    char fname[],
+    struct df_cp *p_df_cp
+) {
+    /*********************
+    * Main function:
+    *     import the circulation pattern classification results
+    * Parameters:
+    *     fname: the file path, together with the file name of CP data
+    * Return:
+    *     bring back struct array of cp data to main() function;
+    *     the return value of the function: the number of rows in the data file
+    *********************/
+    FILE *fp_cp;
+    char row[MAXCHAR];
+    char *token;
+    struct df_cp *p;  // struct pointer for iteration
+    int j;  
+    if ((fp_cp=fopen(fname, "r")) == NULL) {
+        printf("Cannot open cp data file\n");
+        exit(0);
+    }
+    j = 0;  // from the first row 
+    p = p_df_cp;
+    while (!feof(fp_cp))
+    {
+        // the fgets() function comes from <stdbool.h>
+        // Reads characters from stream and stores them as a C string
+        fgets(row, MAXCHAR, fp_cp); 
+        token = strtok(row, ",");  
+        p->date.y = atoi(token);
+        p->date.m = atoi(strtok(NULL, ","));
+        p->date.d = atoi(strtok(NULL, ","));
+        p->cp = atoi(strtok(NULL, ","));
+        /*
+        strtok() fucntion: https://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
+        */
+        p++; j++;
+    }
+    fclose(fp_cp);
+    return j;  // the number of rows
 }

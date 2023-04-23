@@ -17,7 +17,7 @@
 //     return 0;
 // }
 
-int import_df_cp(
+int import_df_cp1(
     char fname[],
     int ncol,
     int df[][4] 
