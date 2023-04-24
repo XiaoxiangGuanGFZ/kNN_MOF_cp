@@ -29,4 +29,5 @@ Email: guan@gfz-potsdam.de
 - evaluate the disaggregation performance (daily rr, and time consumption)
 - complete section 'how to use'
 - compose a R script for multiple runs
+- my.log function 
 
