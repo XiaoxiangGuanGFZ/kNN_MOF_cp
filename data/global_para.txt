@@ -16,7 +16,7 @@ FP_HOURLY,D:/kNN_MOF_cp/data/rr_obs_hourly.csv
 # the file path to store the disaggregated hourly rr results
 FP_OUT,D:/kNN_MOF_cp/output/rr_sim_hourly.csv
 
-FP_LOG,D:/kNN_MOF_cp/my_disaggregation.log
+FP_LOG,D:/kNN_MOF_cp/my.log
 
 # ------- the parameters in kNN_MOF_cp algorithm ---------
 # number of the rain stations
