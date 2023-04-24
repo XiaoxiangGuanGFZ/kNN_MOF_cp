@@ -12,6 +12,18 @@ The k-nearest neighbors algorithm, also known as KNN or k-NN, is a non-parametri
 circulation patterns are divided on the basis of daily values of the mean sea-level pressure field of the ERA5 data set for the period from January 1979 to July 2021. 
 The classification is conducted using the objective classification algorithm SANDRA (Simulated ANnealing and Diversified RAndomization) (Philipp et al., 2007). It is based on k-means and minimizes the within-cluster variance of the Euclidian distance between the cluster elements and the cluster centroid. 
 ## How to use
+### About the programm
+- the program is written in c, with the compiler: gcc version 6.3.0 (MinGW.org GCC-6.3.0-1)
+- to compile (in the command line / PowerShell with the path changed): `gcc main.c`
+- an executable application is generated: `a.exe`
+- execute in command line again: `a.exe global_para.txt`
+- attention: don't forget the file path of both a.exe and parameter file
+### Global parameter file
+`global_para.txt` provides the key information controlling main behaviors of kNN_MOF_cp disaggregation, including file path and algorithm parameters.
+Detailed comments and explanation can be found in the example file `global_para.txt`.
+Lines starting with the letter # are comment lines.
+### Multiple runs
+
 
 ## Paper related
 Xiaoxiang Guan, Katrin Nissen, Dung Viet Nguyen, Bruno Merz, Benjamin Winter, Sergiy Vorogushyn. Multisite temporal rainfall disaggregation using methods of fragments conditioned on circulation patterns. (under review)
