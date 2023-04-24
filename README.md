@@ -1,12 +1,6 @@
 # kNN_MOF_cp
 k-nearest resampling (kNN) and method-of-fragments (MOF) based rainfall temporal disaggregation model conditioned on circulation patterns (cp) (written in c)
 
-kNN: k-nearest neighbors sampling 
-
-MOF: method of fragments
-
-CP: circulation patterns
-
 ## Introduction
 A temporal disaggregation model is usually used to derive sub-daily (like hourly) distributions of weather variables from daily scale. kNN_MOF_CP is a non-parametric dtsaggregation procedure developed for multisite daily-to-hourly rainfall and air temperature disaggregation. In the procedure, mothod of fragments (MOF) based on k-nearest neighbor resampling conditioned on circulation pattern classification is applied. 
 ## Techniques
@@ -32,6 +26,7 @@ Philipp, A., Della-Marta, P.M., Jacobeit, J., Fereday, D.R., Jones, P.D., Moberg
 
 Email: guan@gfz-potsdam.de
 ## To-do list
-- csv data import and export functions
-- functions on date series
-- temporal aggregation (hourly2daily)
+- evaluate the disaggregation performance (daily rr, and time consumption)
+- complete section 'how to use'
+- compose a R script for multiple runs
+
