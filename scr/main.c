@@ -442,7 +442,7 @@ void kNN_MOF(
     // p_gp->CONTINUITY: 3, skip = 1;
     skip = (p_gp->CONTINUITY - 1) / 2;
     int pool_cans[MAXrow];  // the index of the candidates
-    int n_cans=0;  // the number of candidates
+    int n_cans_c=0;  // the number of candidates after continuity filtering
     int Toggle_CONTUINITY(
         struct df_rr_h *p_rrh,
         struct df_rr_d *p_rrd,
@@ -467,7 +467,7 @@ void kNN_MOF(
         );
         if (Toggle_wd == 0) {
             // this is a non-rainy day; all 0.0
-            n_cans = -1;
+            n_cans_c = -1;
             for (j=0; j<p_gp->N_STATION; j++){
                 for (h=0; h<24; h++) {
                     df_rr_h_out.rr_h[j][h] = 0.0;
@@ -475,7 +475,7 @@ void kNN_MOF(
             }
         } else {
             // this is a rainy day; we will disaggregate it.
-            n_cans = Toggle_CONTUINITY(
+            n_cans_c = Toggle_CONTUINITY(
                 p_rrh,
                 p_rrd + i,
                 p_gp,
@@ -483,8 +483,8 @@ void kNN_MOF(
                 pool_cans,
                 0  // WD == 0, strict
             );
-            if (n_cans == 0) {
-                n_cans = Toggle_CONTUINITY(
+            if (n_cans_c < 2) {
+                n_cans_c = Toggle_CONTUINITY(
                             p_rrh,
                             p_rrd + i,
                             p_gp,
@@ -495,7 +495,7 @@ void kNN_MOF(
             }
             
         }
-        printf("%d-%d-%d: %d\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d, n_cans);
+        printf("%d-%d-%d: %d\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d, n_cans_c);
     }
 }
 
@@ -538,9 +538,7 @@ int Toggle_CONTUINITY(
                     // WD == 1
                     /*flexible wet-dry matching*/
                     if (
-                        (int)(
-                            ((p_rrd + i)->p_rr[j] > 0.0) == ((p_rrh + k + i)->rr_d[j] >= 0.0)
-                        ) < 1
+                        ((p_rrd + i)->p_rr[j] > 0.0) && ((p_rrh + k + i)->rr_d[j] == 0.0)
                     ) {
                         toggle_WD = 0;
                     }
