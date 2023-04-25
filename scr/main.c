@@ -57,6 +57,8 @@ void main(int argc, char * argv[]) {
     */
     /* char fname[100] = "D:/kNN_MOF_cp/data/global_para.txt";
         this should be the only extern input for this program */
+    time_t tm;  //datatype from <time.h>
+    time(&tm);
     struct Para_global Para_df = {
         "D:/kNN_MOD_cp/data/test_rr_daily.txt",
         "D:/kNN_MOF_cp/data/test_cp_series.txt",
@@ -72,12 +74,36 @@ void main(int argc, char * argv[]) {
     struct Para_global * p_gp;
     p_gp = &Para_df;
     void import_global(char fname[], struct Para_global *p_gp);  // function declaration
-    /* import the global parameters 
+    /******* import the global parameters ***********
     parameter from main() function, pointer array
     argv[0]: pointing to the first string from command line (the executable file)
     argv[1]: pointing to the second string (parameter): file path and name of global parameter file.
     */
-    import_global(*(++argv), p_gp);  
+    import_global(*(++argv), p_gp);
+    FILE *p_log;  // file pointer pointing to log file
+    if ((p_log=fopen(p_gp->FP_LOG, "a+")) == NULL) {
+        printf("cannot create / open log file\n");
+        exit(0);
+    }
+    printf("------ Global parameter import completed: %s\n", ctime(&tm));
+    fprintf(p_log, "------ Global parameter import completed: %s ", ctime(&tm));
+
+    printf(
+        "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP: %s\nFP_OUT: %s\nFP_LOG: %s\n",
+        p_gp->FP_DAILY, p_gp->FP_HOURLY, p_gp->FP_CP, p_gp->FP_OUT, p_gp->FP_LOG
+    );
+    fprintf(p_log, "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP: %s\nFP_OUT: %s\nFP_LOG: %s\n",
+        p_gp->FP_DAILY, p_gp->FP_HOURLY, p_gp->FP_CP, p_gp->FP_OUT, p_gp->FP_LOG);
+
+    printf(
+        "------ Disaggregation parameters: -----\nT_CP: %s\nSEASON: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\n",
+        p_gp->T_CP, p_gp->SEASON, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD
+    );
+    fprintf(
+        p_log,
+        "------ Disaggregation parameters: -----\nT_CP: %s\nSEASON: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\n",
+        p_gp->T_CP, p_gp->SEASON, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD
+    );
     /******* import circulation pattern series *********/
     int import_df_cp(
         char fname[],
@@ -87,14 +113,25 @@ void main(int argc, char * argv[]) {
     int nrow_cp=0;  // the number of CP data columns: 4 (y, m, d, cp)
     if (strcmp(p_gp->T_CP, "TRUE") == 0) {
         nrow_cp = import_df_cp(Para_df.FP_CP, df_cps);
-        printf("------ Import CP data series (Done) ------ \n");
-        printf("* number of CP data rows: %d\n", nrow_cp);
+        time(&tm);
+        printf("------ Import CP data series (Done): %s \n", ctime(&tm)); 
+        fprintf(p_log, "------ Import CP data series (Done): %s \n", ctime(&tm));
+
+        printf("* number of CP data rows: %d\n", nrow_cp); fprintf(p_log, "* number of CP data rows: %d\n", nrow_cp);
+
         printf("* the first day: %d-%d-%d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
+        fprintf(p_log, "* the first day: %d-%d-%d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
+        
         printf("* the last day: %d-%d-%d \n", 
             df_cps[nrow_cp-1].date.y, df_cps[nrow_cp-1].date.m, df_cps[nrow_cp-1].date.d
         );
+        fprintf(p_log, "* the last day: %d-%d-%d \n", 
+            df_cps[nrow_cp-1].date.y, df_cps[nrow_cp-1].date.m, df_cps[nrow_cp-1].date.d
+        );
     } else {
-        printf("------ Disaggregation conditioned only on seasonality (12 months) ------ \n");
+        time(&tm);
+        printf("------ Disaggregation conditioned only on seasonality (12 months): %s \n", ctime(&tm));
+        fprintf(p_log, "------ Disaggregation conditioned only on seasonality (12 months): %s ", ctime(&tm));
     }
     /****** import daily rainfall data (to be disaggregated) *******/
     int import_dfrr_d(
@@ -109,10 +146,20 @@ void main(int argc, char * argv[]) {
         Para_df.N_STATION,
         df_rr_daily
     );
-    printf("------ Import daily rr data (Done) ------ \n");
-    printf("* the total rows: %d\n", nrow_rr_d);
+    time(&tm);
+    printf("------ Import daily rr data (Done): %s \n", ctime(&tm)); fprintf(p_log, "------ Import daily rr data (Done): %s ", ctime(&tm));
+    
+    printf("* the total rows: %d\n", nrow_rr_d); fprintf(p_log, "* the total rows: %d\n", nrow_rr_d);
+    
     printf("* the first day: %d-%d-%d\n", df_rr_daily[0].date.y,df_rr_daily[0].date.m,df_rr_daily[0].date.d);
+    fprintf(p_log, "* the first day: %d-%d-%d\n", df_rr_daily[0].date.y,df_rr_daily[0].date.m,df_rr_daily[0].date.d);
+
     printf(
+        "* the last day: %d-%d-%d\n", 
+        df_rr_daily[nrow_rr_d-1].date.y,df_rr_daily[nrow_rr_d-1].date.m,df_rr_daily[nrow_rr_d-1].date.d
+    );
+    fprintf(
+        p_log,
         "* the last day: %d-%d-%d\n", 
         df_rr_daily[nrow_rr_d-1].date.y,df_rr_daily[nrow_rr_d-1].date.m,df_rr_daily[nrow_rr_d-1].date.d
     );
@@ -126,13 +173,25 @@ void main(int argc, char * argv[]) {
     int ndays_h;
     struct df_rr_h df_rr_hourly[MAXrow];
     ndays_h = import_dfrr_h(Para_df.FP_HOURLY, Para_df.N_STATION, df_rr_hourly);
-    printf("------ Import hourly rr data (Done) ------ \n");
-    printf("* total hourly obs days: %d\n", ndays_h);
+
+    time(&tm);
+    printf("------ Import hourly rr data (Done): %s \n", ctime(&tm)); fprintf(p_log, "------ Import hourly rr data (Done): %s ", ctime(&tm));
+    
+    printf("* total hourly obs days: %d\n", ndays_h); fprintf(p_log, "* total hourly obs days: %d\n", ndays_h);
+    
     printf("* the first day: %d-%d-%d\n", df_rr_hourly[0].date.y, df_rr_hourly[0].date.m, df_rr_hourly[0].date.d);
+    fprintf(p_log, "* the first day: %d-%d-%d\n", df_rr_hourly[0].date.y, df_rr_hourly[0].date.m, df_rr_hourly[0].date.d);
+    
     printf(
         "* the last day: %d-%d-%d\n", 
         df_rr_hourly[ndays_h-1].date.y, df_rr_hourly[ndays_h-1].date.m, df_rr_hourly[ndays_h-1].date.d
     );
+    fprintf(
+        p_log,
+        "* the last day: %d-%d-%d\n", 
+        df_rr_hourly[ndays_h-1].date.y, df_rr_hourly[ndays_h-1].date.m, df_rr_hourly[ndays_h-1].date.d
+    );
+
     /****** Disaggregation: kNN_MOF_cp *******/
     void kNN_MOF(
         struct df_rr_h *p_rrh,
@@ -152,7 +211,10 @@ void main(int argc, char * argv[]) {
         ndays_h,
         nrow_cp
     );
-    printf("------ Disaggregation daily2hourly (Done) ------ \n");
+    time(&tm);
+    printf("------ Disaggregation daily2hourly (Done): %s \n", ctime(&tm));
+    fprintf(p_log, "------ Disaggregation daily2hourly (Done): %s ", ctime(&tm));
+
 }
 
 void import_global(
@@ -228,16 +290,7 @@ void import_global(
         }
     }
     fclose(fp);
-    printf("------ Global parameter import completed: -----\n");
-    printf(
-        "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP: %s\nFP_OUT: %s\nFP_LOG: %s\n",
-        p_gp->FP_DAILY, p_gp->FP_HOURLY, p_gp->FP_CP, p_gp->FP_OUT, p_gp->FP_LOG
-    );
-    printf("------ Disaggregation parameters: -----\n");
-    printf(
-        "T_CP: %s\nSEASON: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\n",
-        p_gp->T_CP, p_gp->SEASON, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD
-    );
+    
 }
 
 int import_dfrr_d(
