@@ -14,19 +14,19 @@ The classification is conducted using the objective classification algorithm SAN
 ## How to use
 ### About the programm
 - the program is written in c, with the compiler: gcc version 6.3.0 (MinGW.org GCC-6.3.0-1)
-- to compile (in the command line / PowerShell with the path changed): `gcc main.c`
+- to compile (in the command line / PowerShell with the path changed): `gcc ./scr/main.c`
 - an executable application is generated: `a.exe`
-- execute in command line again to run the programm: `a.exe global_para.txt`
+- execute in command line again to run the programm: `./scr/a.exe ./data/global_para.txt`
 - attention: don't forget the file path of both a.exe and parameter file
 ### Global parameter file
 `global_para.txt` provides the key information controlling main behaviors of kNN_MOF_cp disaggregation, including file path and algorithm parameters.
-Detailed comments and explanation can be found in the example file `global_para.txt`.
+Detailed comments and explanation can be found in the example file `./data/global_para.txt`.
 Lines starting with the letter # are comment (invalid) lines.
 
 ### Multiple runs
 After compiling the programm, the generated executable application can be called from other portal (for instance Matlab, R or Python). Therefore, the disaggregation can be conducted for multiple times for the same or different inputs (daily rr data) by tailoring  `global_para.txt`.
 
-An example for multiple running by R is given here, see `multiple_runs.r`
+An example for multiple running by R is given here, see `./scr/multiple_runs.r`
 
 ## Paper related
 Xiaoxiang Guan, Katrin Nissen, Dung Viet Nguyen, Bruno Merz, Benjamin Winter, Sergiy Vorogushyn. Multisite temporal rainfall disaggregation using methods of fragments conditioned on circulation patterns. (under review)
@@ -41,8 +41,5 @@ Philipp, A., Della-Marta, P.M., Jacobeit, J., Fereday, D.R., Jones, P.D., Moberg
 
 Email: guan@gfz-potsdam.de
 ## To-do list
-- evaluate the disaggregation performance (daily rr, and time consumption)
-- complete section `How to use`
-- compose a R script for multiple runs
 - my.log function 
 
