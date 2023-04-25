@@ -41,5 +41,5 @@ Philipp, A., Della-Marta, P.M., Jacobeit, J., Fereday, D.R., Jones, P.D., Moberg
 
 Email: guan@gfz-potsdam.de
 ## To-do list
-- my.log function 
+
 
