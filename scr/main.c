@@ -281,15 +281,15 @@ int import_dfrr_d(
         }
         i=i+1;
     }
-    nrow = i;
+    nrow = i-1;
     fclose(fp_d);
     
-    for (i=16;i < 17;i++) {
-        printf("\ndate: %d-%d-%d: \n", (p_rr_d + i)->date.y, (p_rr_d + i)->date.m, (p_rr_d + i)->date.d);
-        for (j=0; j < N_STATION; j++) {
-            printf("%3.1f\t", *((p_rr_d + i)->p_rr+j));
-        }
-    }
+    // for (i=16;i < 17;i++) {
+    //     printf("\ndate: %d-%d-%d: \n", (p_rr_d + i)->date.y, (p_rr_d + i)->date.m, (p_rr_d + i)->date.d);
+    //     for (j=0; j < N_STATION; j++) {
+    //         printf("%3.1f\t", *((p_rr_d + i)->p_rr+j));
+    //     }
+    // }
     printf("\n");
     return nrow;
 }
@@ -360,22 +360,22 @@ int import_dfrr_h(
         }
     }
     /* check the results */ 
-    p_df_rr_h = p_rr_h + 16;
-    printf("%d-%d-%d: \n", p_df_rr_h->date.y, p_df_rr_h->date.m, p_df_rr_h->date.d);
-    for (h=0; h < 24; h++) {
-        printf("H: %d\n", h);
-        for (j=0; j < N_STATION; j++){
-            printf("%3.1f\t", p_df_rr_h->rr_h[j][h]);
-        }
-        printf("\n");
-    }
-    printf("daily: \n");
-    for (j=0; j < N_STATION; j++){
-            printf("%3.1f\t", p_df_rr_h->rr_d[j]);
-    }
-    printf("\n");
+    // p_df_rr_h = p_rr_h + 16;
+    // printf("%d-%d-%d: \n", p_df_rr_h->date.y, p_df_rr_h->date.m, p_df_rr_h->date.d);
+    // for (h=0; h < 24; h++) {
+    //     printf("H: %d\n", h);
+    //     for (j=0; j < N_STATION; j++){
+    //         printf("%3.1f\t", p_df_rr_h->rr_h[j][h]);
+    //     }
+    //     printf("\n");
+    // }
+    // printf("daily: \n");
+    // for (j=0; j < N_STATION; j++){
+    //         printf("%3.1f\t", p_df_rr_h->rr_d[j]);
+    // }
+    // printf("\n");
 
-    return ndays;
+    return ndays-1; // the last is null
 }
 
 int import_df_cp(
@@ -418,7 +418,7 @@ int import_df_cp(
         p++; j++;
     }
     fclose(fp_cp);
-    return j;  // the number of rows
+    return j - 1;  // the number of rows; the last row is null
 }
 
 void kNN_MOF(
