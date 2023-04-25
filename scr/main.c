@@ -7,7 +7,7 @@
 
 
 # define MAXCHAR 4000
-# define MAXrow 20000  // almost 100 years long ts
+# define MAXrow 30000  // almost 100 years long ts
 
 struct Date {
     int y;
@@ -85,8 +85,8 @@ void main(int argc, char * argv[]) {
         printf("cannot create / open log file\n");
         exit(0);
     }
-    printf("------ Global parameter import completed: %s\n", ctime(&tm));
-    fprintf(p_log, "------ Global parameter import completed: %s ", ctime(&tm));
+    printf("------ Global parameter import completed: %s", ctime(&tm));
+    fprintf(p_log, "------ Global parameter import completed: %s", ctime(&tm));
 
     printf(
         "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP: %s\nFP_OUT: %s\nFP_LOG: %s\n",
@@ -114,8 +114,8 @@ void main(int argc, char * argv[]) {
     if (strcmp(p_gp->T_CP, "TRUE") == 0) {
         nrow_cp = import_df_cp(Para_df.FP_CP, df_cps);
         time(&tm);
-        printf("------ Import CP data series (Done): %s \n", ctime(&tm)); 
-        fprintf(p_log, "------ Import CP data series (Done): %s \n", ctime(&tm));
+        printf("------ Import CP data series (Done): %s", ctime(&tm)); 
+        fprintf(p_log, "------ Import CP data series (Done): %s", ctime(&tm));
 
         printf("* number of CP data rows: %d\n", nrow_cp); fprintf(p_log, "* number of CP data rows: %d\n", nrow_cp);
 
@@ -130,8 +130,8 @@ void main(int argc, char * argv[]) {
         );
     } else {
         time(&tm);
-        printf("------ Disaggregation conditioned only on seasonality (12 months): %s \n", ctime(&tm));
-        fprintf(p_log, "------ Disaggregation conditioned only on seasonality (12 months): %s ", ctime(&tm));
+        printf("------ Disaggregation conditioned only on seasonality (12 months): %s", ctime(&tm));
+        fprintf(p_log, "------ Disaggregation conditioned only on seasonality (12 months): %s", ctime(&tm));
     }
     /****** import daily rainfall data (to be disaggregated) *******/
     int import_dfrr_d(
@@ -147,7 +147,7 @@ void main(int argc, char * argv[]) {
         df_rr_daily
     );
     time(&tm);
-    printf("------ Import daily rr data (Done): %s \n", ctime(&tm)); fprintf(p_log, "------ Import daily rr data (Done): %s ", ctime(&tm));
+    printf("------ Import daily rr data (Done): %s", ctime(&tm)); fprintf(p_log, "------ Import daily rr data (Done): %s", ctime(&tm));
     
     printf("* the total rows: %d\n", nrow_rr_d); fprintf(p_log, "* the total rows: %d\n", nrow_rr_d);
     
@@ -175,7 +175,7 @@ void main(int argc, char * argv[]) {
     ndays_h = import_dfrr_h(Para_df.FP_HOURLY, Para_df.N_STATION, df_rr_hourly);
 
     time(&tm);
-    printf("------ Import hourly rr data (Done): %s \n", ctime(&tm)); fprintf(p_log, "------ Import hourly rr data (Done): %s ", ctime(&tm));
+    printf("------ Import hourly rr data (Done): %s", ctime(&tm)); fprintf(p_log, "------ Import hourly rr data (Done): %s", ctime(&tm));
     
     printf("* total hourly obs days: %d\n", ndays_h); fprintf(p_log, "* total hourly obs days: %d\n", ndays_h);
     
@@ -212,8 +212,8 @@ void main(int argc, char * argv[]) {
         nrow_cp
     );
     time(&tm);
-    printf("------ Disaggregation daily2hourly (Done): %s \n", ctime(&tm));
-    fprintf(p_log, "------ Disaggregation daily2hourly (Done): %s ", ctime(&tm));
+    printf("------ Disaggregation daily2hourly (Done): %s", ctime(&tm));
+    fprintf(p_log, "------ Disaggregation daily2hourly (Done): %s", ctime(&tm));
 
 }
 
