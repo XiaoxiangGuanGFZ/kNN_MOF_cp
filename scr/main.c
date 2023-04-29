@@ -504,7 +504,7 @@ void kNN_MOF(
     int n_cans_c=0;  // the number of candidates after continuity filtering
     int n_can; //the number of candidates after all conditioning (cp and seasonality)
     int fragment; // the index of df_rr_h structure with the final chosed fragments
-    int Toggle_CONTUINITY(
+    int Toggle_CONTINUITY(
         struct df_rr_h *p_rrh,
         struct df_rr_d *p_rrd,
         struct Para_global *p_gp,
@@ -546,6 +546,7 @@ void kNN_MOF(
         df_rr_h_out.rr_d = (p_rrd + i)->p_rr; // is this valid?; address transfer
         df_rr_h_out.rr_h = calloc(p_gp->N_STATION, sizeof(double) * 24);  // allocate memory (stack);
         Toggle_wd = 0;  // initialize with 0 (non-rainy)
+        n_cans_c = 0;
         for (j=0; j < p_gp->N_STATION; j++) {
             if (*((p_rrd + i)->p_rr + j) > 0.0) {
                 // any gauge with rr > 0.0
@@ -564,18 +565,20 @@ void kNN_MOF(
                 }
             }
         } else {
+            // Toggle_wd == 1;
             // this is a rainy day; we will disaggregate it.
-            n_cans_c = Toggle_CONTUINITY(
+            n_cans_c = Toggle_CONTINUITY(
                 p_rrh,
-                p_rrd + i,
+                p_rrd + i,  // pointing to the target day struct
                 p_gp,
                 ndays_h,
                 pool_cans,
-                0  // WD == 0, strict
+                0  // WD == 0, strict; 
+                // wet-dry status vectors match with each other (candidate and target day) at multiple rain gauges perfectly.
             );
             // printf("WD-0: ncan: %d\n", n_cans_c);
             if (n_cans_c < 2) {
-                n_cans_c = Toggle_CONTUINITY(
+                n_cans_c = Toggle_CONTINUITY(
                             p_rrh,
                             p_rrd + i,
                             p_gp,
@@ -585,14 +588,19 @@ void kNN_MOF(
                         );
                 // printf("WD-1: ncan: %d\n", n_cans_c);
             }
-            if (n_cans_c == 1) {
-                // only one candidate
+            if (n_cans_c == 0) {
+                printf("the target day %d-%d-%d has no matching hourly candidate!\n", 
+                (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d);
+                printf("Programm terminated!"); exit(0);
+            } else if (n_cans_c == 1) {
+                // only one candidate fits here
                 fragment = pool_cans[0];
             } else {
+                // n_cans_c > 1;
                 // candidates filtering based on CP and seasonality
                 n_can=0;
                 for (int t = 0; t < n_cans_c; t++) {
-                    toggle_cp = 0; 
+                    toggle_cp = 0; // initialize the toggle_cp for every iteration
                     if (strcmp(p_gp->T_CP, "TRUE") == 0) {
                         // disaggregation conditioned on circulation pattern classification
                         if (
@@ -627,10 +635,10 @@ void kNN_MOF(
                     }
                 }
                 /******** filtering is done: *********/
-                
                 if (n_can == 1) {
                     fragment = pool_cans[0];
                 } else {
+                    // n_can == 0 or n_can > 1
                     if (n_can == 0) {
                         // after cp and seasonality filtering, there is not candidates any more.
                         n_can = n_cans_c;
@@ -651,7 +659,7 @@ void kNN_MOF(
     fclose(p_FP_OUT);
 }
 
-int Toggle_CONTUINITY(
+int Toggle_CONTINUITY(
     struct df_rr_h *p_rrh,
     struct df_rr_d *p_rrd,
     struct Para_global *p_gp,
@@ -723,8 +731,14 @@ int Toogle_CP(
     int nrow_cp
 ){
     /*************
-     * 
-     * 
+     * Description:
+     *      derive the cp value (class) of the day with the date
+     * Parameters:
+     *      date: a Date struct, conaining y, m and d
+     *      p_cp: pointing to the cp data struct array
+     *      nrow_cp: total rows of cp observations
+     * Output:
+     *      return the derived cp value
      * **********/
     int i;
     int cp = -1;
@@ -844,18 +858,38 @@ void Fragment_assign(
     int fragment
 ){
     /**********
-     * 
+     * Description:
+     *      disaggregate the target day rainfall into hourly scale based on the selected fragments
+     * Parameters: 
+     *      p_rrh: pointing to the hourly obs rr structure array
+     *      p_out: pointing to the disaggregated hourly rr results struct (to output) 
+     *      p_gp: global parameters struct
+     *      fragment: the index of p_rrh struct after filtering and resampling
+     * Output:
+     *      p_out
      * *******/
-    int j,h;
-    for (j=0; j<p_gp->N_STATION; j++) {
-        if (p_out->rr_d[j] <= 0.0) {
-            for (h=0; h<24; h++) {p_out->rr_h[j][h] = 0.0;}
-        } else {
-            for (h=0; h<24; h++) {
-                p_out->rr_h[j][h] = p_out->rr_d[j] * (p_rrh + fragment)->rr_h[j][h] / (p_rrh + fragment)->rr_d[j];
-            }
+    int j,h,toggle;
+    toggle = 1;
+    for (j=0; j<p_gp->N_STATION;j++) {
+        if (p_out->rr_d[j] > 0.0 && (p_rrh + fragment)->rr_d[j] <= 0.0 ) {
+            toggle = 0;
         }
     }
+    if (toggle == 1) {
+        for (j=0; j<p_gp->N_STATION; j++) {
+            if (p_out->rr_d[j] <= 0.0) {
+                for (h=0; h<24; h++) {p_out->rr_h[j][h] = 0.0;}
+            } else {
+                for (h=0; h<24; h++) {
+                    p_out->rr_h[j][h] = p_out->rr_d[j] * (p_rrh + fragment)->rr_h[j][h] / (p_rrh + fragment)->rr_d[j];
+                }
+            }
+        }
+    } else {
+        printf("The target day %d-%d-%d disaggregation failed, please check or retry!\n---Programm terminated!", 
+        p_out->date.y, p_out->date.m, p_out->date.d);
+    }
+    
     // printf("hourly example: %f,%f,%f,%f\n", p_out->rr_h[0][0],p_out->rr_h[1][0],p_out->rr_h[2][0],p_out->rr_h[3][0]);
 }
 void Write_df_rr_h(
@@ -864,7 +898,11 @@ void Write_df_rr_h(
     FILE *p_FP_OUT
 ){
     /**************
-     * 
+     * Description:
+     *      write the disaggregated results into output file (.csv)
+     * Parameters:
+     *      p_gp: 
+     *      p_FP_OUT: a FILE pointer, pointing to the output file
      * 
      * ************/
     int j,h;
