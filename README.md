@@ -41,6 +41,6 @@ Philipp, A., Della-Marta, P.M., Jacobeit, J., Fereday, D.R., Jones, P.D., Moberg
 
 Email: guan@gfz-potsdam.de
 ## To-do list
-
+it is strange some daily precipitation totals are not identified and disaggregated into 0.0 series, to be figured out. 
 
 
