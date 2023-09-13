@@ -1,5 +1,6 @@
 # ignore these when updating
 /.vscode/
-/docs/C Date Time.docx
+/docs/
 /output/
 /scr/a.exe
+/my.log
