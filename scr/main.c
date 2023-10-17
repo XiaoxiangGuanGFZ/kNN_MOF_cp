@@ -908,12 +908,13 @@ void Fragment_assign(
     }
     if (toggle == 1) {
         for (j=0; j<p_gp->N_STATION; j++) {
-            if (p_out->rr_d[j] <= 0.0) {
-                for (h=0; h<24; h++) {p_out->rr_h[j][h] = 0.0;}
-            } else {
+            if (p_out->rr_d[j] > 0.0) {
                 for (h=0; h<24; h++) {
                     p_out->rr_h[j][h] = p_out->rr_d[j] * (p_rrh + fragment)->rr_h[j][h] / (p_rrh + fragment)->rr_d[j];
                 }
+            } else {
+                // no rain at station j
+                for (h=0; h<24; h++) {p_out->rr_h[j][h] = 0.0;}
             }
         }
     } else {
@@ -952,7 +953,7 @@ void Write_df_rr_h(
                 ",%.3f", p_out->rr_h[j][h]
             );
         }
-        fprintf(p_FP_OUT, "\n"); // print "\n" after one row
+        fprintf(p_FP_OUT, "\n"); // print "\n" (newline) after one row
     }
     // printf("%d-%d-%d: Done\n", p_out->date.y, p_out->date.m, p_out->date.d); // print to screen (command line)
 }
