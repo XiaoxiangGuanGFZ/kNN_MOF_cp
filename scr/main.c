@@ -903,6 +903,7 @@ void Fragment_assign(
     for (j=0; j<p_gp->N_STATION;j++) {
         if (p_out->rr_d[j] > 0.0 && (p_rrh + fragment)->rr_d[j] <= 0.0 ) {
             toggle = 0;
+            break;
         }
     }
     if (toggle == 1) {
