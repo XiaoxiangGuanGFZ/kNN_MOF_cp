@@ -64,6 +64,68 @@ struct Para_global
         int WD;                 // the flexibility level of wet-dry status in candidates filtering
     };
 
+/* ---- function declaration ---- */
+// data import functions
+void import_global(char fname[], struct Para_global *p_gp);  // function declaration
+int import_df_cp(
+        char fname[],
+        struct df_cp *p_df_cp
+    );
+int import_dfrr_d(
+        char FP_daily[], 
+        int N_STATION,
+        struct df_rr_d *p_rr_d
+    );  // declare
+int import_dfrr_h(
+        char FP_hourly[], 
+        int N_STATION,
+        struct df_rr_h *p_rr_h
+    );
+
+
+// kNN_MOF_cp algorithm functions
+int Toggle_CONTINUITY(
+        struct df_rr_h *p_rrh,
+        struct df_rr_d *p_rrd,
+        struct Para_global *p_gp,
+        int ndays_h,
+        int pool_cans[],
+        int WD
+    );
+    int Toogle_CP(
+        struct Date date,
+        struct df_cp *p_cp,
+        int nrow_cp
+    );
+    int kNN_sampling(
+        struct df_rr_d *p_rrd,
+        struct df_rr_h *p_rrh,
+        struct Para_global *p_gp,
+        int pool_cans[],
+        int n_can
+    );
+    void Fragment_assign(
+        struct df_rr_h *p_rrh,
+        struct df_rr_h *p_out,
+        struct Para_global *p_gp,
+        int fragment
+    );
+    void Write_df_rr_h(
+        struct df_rr_h *p_out,
+        struct Para_global *p_gp,
+        FILE *p_FP_OUT
+    );
+
+void kNN_MOF(
+        struct df_rr_h *p_rrh,
+        struct df_rr_d *p_rrd,
+        struct df_cp *p_cp,
+        struct Para_global *p_gp,
+        int nrow_rr_d,
+        int ndays_h,
+        int nrow_cp
+    );
+
 void main(int argc, char * argv[]) {
     /*
     int argc: the number of parameters of main() function;
@@ -87,7 +149,7 @@ void main(int argc, char * argv[]) {
     };  // define the global-parameter structure and initialization
     struct Para_global * p_gp;      // give a pointer to global_parameter structure
     p_gp = &Para_df;
-    void import_global(char fname[], struct Para_global *p_gp);  // function declaration
+    
     /******* import the global parameters ***********
     parameter from main() function, pointer array
     argv[0]: pointing to the first string from command line (the executable file)
@@ -119,10 +181,7 @@ void main(int argc, char * argv[]) {
         p_gp->T_CP, p_gp->SEASON, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD
     );
     /******* import circulation pattern series *********/
-    int import_df_cp(
-        char fname[],
-        struct df_cp *p_df_cp
-    );
+    
     struct df_cp df_cps[MAXrow];
     int nrow_cp=0;  // the number of CP data columns: 4 (y, m, d, cp)
     if (strcmp(p_gp->T_CP, "TRUE") == 0) {
@@ -149,11 +208,7 @@ void main(int argc, char * argv[]) {
         fprintf(p_log, "------ Disaggregation conditioned only on seasonality (12 months): %s", ctime(&tm));
     }
     /****** import daily rainfall data (to be disaggregated) *******/
-    int import_dfrr_d(
-        char FP_daily[], 
-        int N_STATION,
-        struct df_rr_d *p_rr_d
-    );  // declare
+    
     struct df_rr_d df_rr_daily[MAXrow];
     int nrow_rr_d;
     nrow_rr_d = import_dfrr_d(
@@ -180,11 +235,7 @@ void main(int argc, char * argv[]) {
     );
     
     /****** import hourly rainfall data (obs as fragments) *******/
-    int import_dfrr_h(
-        char FP_hourly[], 
-        int N_STATION,
-        struct df_rr_h *p_rr_h
-    );
+    
     int ndays_h;
     struct df_rr_h df_rr_hourly[MAXrow];
     ndays_h = import_dfrr_h(Para_df.FP_HOURLY, Para_df.N_STATION, df_rr_hourly);
@@ -208,15 +259,7 @@ void main(int argc, char * argv[]) {
     );
 
     /****** Disaggregation: kNN_MOF_cp *******/
-    void kNN_MOF(
-        struct df_rr_h *p_rrh,
-        struct df_rr_d *p_rrd,
-        struct df_cp *p_cp,
-        struct Para_global *p_gp,
-        int nrow_rr_d,
-        int ndays_h,
-        int nrow_cp
-    );
+    
     kNN_MOF(
         df_rr_hourly,
         df_rr_daily,
@@ -519,37 +562,7 @@ void kNN_MOF(
     int n_cans_c=0;  // the number of candidates after continuity filtering
     int n_can; //the number of candidates after all conditioning (cp and seasonality)
     int fragment; // the index of df_rr_h structure with the final chosed fragments
-    int Toggle_CONTINUITY(
-        struct df_rr_h *p_rrh,
-        struct df_rr_d *p_rrd,
-        struct Para_global *p_gp,
-        int ndays_h,
-        int pool_cans[],
-        int WD
-    );
-    int Toogle_CP(
-        struct Date date,
-        struct df_cp *p_cp,
-        int nrow_cp
-    );
-    int kNN_sampling(
-        struct df_rr_d *p_rrd,
-        struct df_rr_h *p_rrh,
-        struct Para_global *p_gp,
-        int pool_cans[],
-        int n_can
-    );
-    void Fragment_assign(
-        struct df_rr_h *p_rrh,
-        struct df_rr_h *p_out,
-        struct Para_global *p_gp,
-        int fragment
-    );
-    void Write_df_rr_h(
-        struct df_rr_h *p_out,
-        struct Para_global *p_gp,
-        FILE *p_FP_OUT
-    );
+    
     FILE *p_FP_OUT;
     if ((p_FP_OUT=fopen(p_gp->FP_OUT, "w")) == NULL) {
         printf("Program terminated: cannot create or open output file\n");
