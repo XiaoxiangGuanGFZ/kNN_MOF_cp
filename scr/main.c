@@ -16,13 +16,24 @@ struct Date {
 };
 struct df_rr_d
 {
-    /* data */
+    /* data
+     * data frame for the daily step precipitation,
+     * p_rr points to a double-type array, 
+     *      with the size equal to the number of stations 
+     */
     struct Date date;    
     double *p_rr;
 };
 struct df_rr_h
 {
-    /* data */
+    /* data
+     * dataframe for the hourly step precipitation, 
+     * rr_h: pointer array; 
+     *      24 double-type pointers; 
+     *      each points to an array of hourly precipitation (all rain sites)
+     * rr_d: double-type pointer;
+     *      pointing to an array of daily precipitation (all rain site) aggregated from rr_h
+     */
     struct Date date;    
     double (*rr_h)[24];
     double *rr_d;
@@ -30,7 +41,10 @@ struct df_rr_h
 
 struct df_cp
 {
-    /* data */
+    /* 
+     * circulation pattern classficiation series
+     * each day with a CP class
+     */
     struct Date date;    
     int cp;
 };
@@ -38,16 +52,16 @@ struct df_cp
 struct Para_global
     {
         /* global parameters */
-        char FP_DAILY[100];
-        char FP_CP[100];
-        char FP_HOURLY[100];
-        char FP_OUT[100];
-        char FP_LOG[100];
-        int N_STATION;
-        char T_CP[10];
-        char SEASON[10];
-        int CONTINUITY;
-        int WD;
+        char FP_DAILY[100];     // file path of daily precipitation data (to be disaggregated)
+        char FP_CP[100];        // file path of circulation pattern (CP) classification data series
+        char FP_HOURLY[100];    // file path of hourly precipitation data (as fragments)
+        char FP_OUT[100];       // file path of output(hourly) precipitation from disaggregation
+        char FP_LOG[100];       // file path of log file
+        int N_STATION;          // number of stations (rain sites)
+        char T_CP[10];          // toggle (flag), whether the CP is considered in the algorithm
+        char SEASON[10];        // toggle (flag), whether the seasonality is considered in the algorithm
+        int CONTINUITY;         // continuity day
+        int WD;                 // the flexibility level of wet-dry status in candidates filtering
     };
 
 void main(int argc, char * argv[]) {
@@ -70,8 +84,8 @@ void main(int argc, char * argv[]) {
         "TRUE",
         1,
         1
-    };  // define the parameter structure and initialization
-    struct Para_global * p_gp;
+    };  // define the global-parameter structure and initialization
+    struct Para_global * p_gp;      // give a pointer to global_parameter structure
     p_gp = &Para_df;
     void import_global(char fname[], struct Para_global *p_gp);  // function declaration
     /******* import the global parameters ***********
@@ -117,7 +131,8 @@ void main(int argc, char * argv[]) {
         printf("------ Import CP data series (Done): %s", ctime(&tm)); 
         fprintf(p_log, "------ Import CP data series (Done): %s", ctime(&tm));
 
-        printf("* number of CP data rows: %d\n", nrow_cp); fprintf(p_log, "* number of CP data rows: %d\n", nrow_cp);
+        printf("* number of CP data rows: %d\n", nrow_cp); 
+        fprintf(p_log, "* number of CP data rows: %d\n", nrow_cp);
 
         printf("* the first day: %d-%d-%d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
         fprintf(p_log, "* the first day: %d-%d-%d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
