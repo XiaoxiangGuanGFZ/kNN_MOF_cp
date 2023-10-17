@@ -2,5 +2,7 @@
 /.vscode/
 /docs/
 /output/
-/scr/a.exe
+/scr/*.exe
+
 /my.log
+
