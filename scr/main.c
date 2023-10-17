@@ -92,29 +92,31 @@ int Toggle_CONTINUITY(
         int pool_cans[],
         int WD
     );
-    int Toogle_CP(
-        struct Date date,
-        struct df_cp *p_cp,
-        int nrow_cp
-    );
-    int kNN_sampling(
-        struct df_rr_d *p_rrd,
-        struct df_rr_h *p_rrh,
-        struct Para_global *p_gp,
-        int pool_cans[],
-        int n_can
-    );
-    void Fragment_assign(
-        struct df_rr_h *p_rrh,
-        struct df_rr_h *p_out,
-        struct Para_global *p_gp,
-        int fragment
-    );
-    void Write_df_rr_h(
-        struct df_rr_h *p_out,
-        struct Para_global *p_gp,
-        FILE *p_FP_OUT
-    );
+
+int Toogle_CP(
+    struct Date date,
+    struct df_cp *p_cp,
+    int nrow_cp);
+
+int kNN_sampling(
+    struct df_rr_d *p_rrd,
+    struct df_rr_h *p_rrh,
+    struct Para_global *p_gp,
+    int pool_cans[],
+    int n_can);
+
+void Fragment_assign(
+    struct df_rr_h *p_rrh,
+    struct df_rr_h *p_out,
+    struct Para_global *p_gp,
+    int fragment);
+
+void Write_df_rr_h(
+    struct df_rr_h *p_out,
+    struct Para_global *p_gp,
+    FILE *p_FP_OUT);
+
+double get_random(); // declare
 
 void kNN_MOF(
         struct df_rr_h *p_rrh,
@@ -193,13 +195,13 @@ void main(int argc, char * argv[]) {
         printf("* number of CP data rows: %d\n", nrow_cp); 
         fprintf(p_log, "* number of CP data rows: %d\n", nrow_cp);
 
-        printf("* the first day: %d-%d-%d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
-        fprintf(p_log, "* the first day: %d-%d-%d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
+        printf("* the first day: %d-%02d-%02d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
+        fprintf(p_log, "* the first day: %d-%02d-%02d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
         
-        printf("* the last day: %d-%d-%d \n", 
+        printf("* the last day: %d-%02d-%02d \n", 
             df_cps[nrow_cp-1].date.y, df_cps[nrow_cp-1].date.m, df_cps[nrow_cp-1].date.d
         );
-        fprintf(p_log, "* the last day: %d-%d-%d \n", 
+        fprintf(p_log, "* the last day: %d-%02d-%02d \n", 
             df_cps[nrow_cp-1].date.y, df_cps[nrow_cp-1].date.m, df_cps[nrow_cp-1].date.d
         );
     } else {
@@ -221,16 +223,16 @@ void main(int argc, char * argv[]) {
     
     printf("* the total rows: %d\n", nrow_rr_d); fprintf(p_log, "* the total rows: %d\n", nrow_rr_d);
     
-    printf("* the first day: %d-%d-%d\n", df_rr_daily[0].date.y,df_rr_daily[0].date.m,df_rr_daily[0].date.d);
-    fprintf(p_log, "* the first day: %d-%d-%d\n", df_rr_daily[0].date.y,df_rr_daily[0].date.m,df_rr_daily[0].date.d);
+    printf("* the first day: %d-%02d-%02d\n", df_rr_daily[0].date.y,df_rr_daily[0].date.m,df_rr_daily[0].date.d);
+    fprintf(p_log, "* the first day: %d-%02d-%02d\n", df_rr_daily[0].date.y,df_rr_daily[0].date.m,df_rr_daily[0].date.d);
 
     printf(
-        "* the last day: %d-%d-%d\n", 
+        "* the last day: %d-%02d-%02d\n", 
         df_rr_daily[nrow_rr_d-1].date.y,df_rr_daily[nrow_rr_d-1].date.m,df_rr_daily[nrow_rr_d-1].date.d
     );
     fprintf(
         p_log,
-        "* the last day: %d-%d-%d\n", 
+        "* the last day: %d-%02d-%02d\n", 
         df_rr_daily[nrow_rr_d-1].date.y,df_rr_daily[nrow_rr_d-1].date.m,df_rr_daily[nrow_rr_d-1].date.d
     );
     
@@ -245,16 +247,16 @@ void main(int argc, char * argv[]) {
     
     printf("* total hourly obs days: %d\n", ndays_h); fprintf(p_log, "* total hourly obs days: %d\n", ndays_h);
     
-    printf("* the first day: %d-%d-%d\n", df_rr_hourly[0].date.y, df_rr_hourly[0].date.m, df_rr_hourly[0].date.d);
-    fprintf(p_log, "* the first day: %d-%d-%d\n", df_rr_hourly[0].date.y, df_rr_hourly[0].date.m, df_rr_hourly[0].date.d);
+    printf("* the first day: %d-%02d-%02d\n", df_rr_hourly[0].date.y, df_rr_hourly[0].date.m, df_rr_hourly[0].date.d);
+    fprintf(p_log, "* the first day: %d-%02d-%02d\n", df_rr_hourly[0].date.y, df_rr_hourly[0].date.m, df_rr_hourly[0].date.d);
     
     printf(
-        "* the last day: %d-%d-%d\n", 
+        "* the last day: %d-%02d-%02d\n", 
         df_rr_hourly[ndays_h-1].date.y, df_rr_hourly[ndays_h-1].date.m, df_rr_hourly[ndays_h-1].date.d
     );
     fprintf(
         p_log,
-        "* the last day: %d-%d-%d\n", 
+        "* the last day: %d-%02d-%02d\n", 
         df_rr_hourly[ndays_h-1].date.y, df_rr_hourly[ndays_h-1].date.m, df_rr_hourly[ndays_h-1].date.d
     );
 
@@ -681,7 +683,7 @@ void kNN_MOF(
         }
         /* write the disaggregation output */
         Write_df_rr_h(&df_rr_h_out, p_gp, p_FP_OUT);
-        printf("%d-%d-%d: Done!\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d);
+        printf("%d-%02d-%02d: Done!\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d);
         // printf("%d-%d-%d: %d\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d, n_can);
     }
     fclose(p_FP_OUT);
@@ -856,7 +858,7 @@ int kNN_sampling(
             *(weights_cdf + i) = *(weights_cdf + i-1) + weights[i];
         }
         /* generate a random number, then an fragments index*/
-        double get_random(); // declare
+        
         srand(time(NULL)); // randomize seed
         double rd = 0;
         rd = get_random(); // call the function to get a different value of n every time
