@@ -916,7 +916,7 @@ void Fragment_assign(
             }
         }
     } else {
-        printf("The target day %d-%d-%d disaggregation failed, please check or retry!\n---Programm terminated!", 
+        printf("The target day %d-%02d-%02d disaggregation failed, please check or retry!\n---Programm terminated!", 
         p_out->date.y, p_out->date.m, p_out->date.d);
     }
     
