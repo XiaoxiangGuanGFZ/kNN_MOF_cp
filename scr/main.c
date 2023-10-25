@@ -488,7 +488,7 @@ int import_dfrr_h(
     // }
     // printf("\n");
 
-    return ndays-1; // the last is null
+    return ndays; // the last is null
 }
 
 int import_df_cp(
