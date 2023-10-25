@@ -581,6 +581,7 @@ void kNN_MOF(
             if (*((p_rrd + i)->p_rr + j) > 0.0) {
                 // any gauge with rr > 0.0
                 Toggle_wd = 1;
+                break;
             }
         }
         // printf("Targetday: %d-%d-%d: %d\n", 
@@ -603,18 +604,29 @@ void kNN_MOF(
                 p_gp,
                 ndays_h,
                 pool_cans,
-                0  // WD == 0, strict; 
-                // wet-dry status vectors match with each other (candidate and target day) at multiple rain gauges perfectly.
+                p_gp->WD  // 
+                /****
+                 * WD == 0, strict; 
+                 * wet-dry status vectors match with each other 
+                 *      (candidate and target day) 
+                 *      at multiple rain gauges perfectly.
+                 * typically, WD == 1, flexible in wet-dry status filtering 
+                 */
             );
             // printf("WD-0: ncan: %d\n", n_cans_c);
-            if (n_cans_c < 2) {
+            if (n_cans_c < 2 && p_gp->WD == 0) {
+                /***
+                 * when the number of candidate days 
+                 *      after strict (WD == 0) wet-dry status filter 
+                 *      is less than 2.
+                 * */ 
                 n_cans_c = Toggle_CONTINUITY(
                             p_rrh,
                             p_rrd + i,
                             p_gp,
                             ndays_h,
                             pool_cans,
-                            1  // WD == 1, flexible
+                            1 
                         );
                 // printf("WD-1: ncan: %d\n", n_cans_c);
             }
@@ -623,7 +635,11 @@ void kNN_MOF(
                 (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d);
                 printf("Programm terminated!"); exit(0);
             } else if (n_cans_c == 1) {
-                // only one candidate fits here
+                /**
+                 * only one candidate fits here after wet-dry status filtering 
+                 *      then we just skip other filtering conditions, like
+                 *      CP or seasonality.
+                */
                 fragment = pool_cans[0];
             } else {
                 // n_cans_c > 1;
@@ -651,7 +667,10 @@ void kNN_MOF(
                             }
                         } 
                     } else {
-                        // p_gp->T_CP != "TRUE": disaggregation conditioned only on seasonality (12 months)
+                        /***
+                         * p_gp->T_CP != "TRUE": 
+                         *      the disaggregation conditioned only on seasonality (12 months)
+                        */
                         if (
                             (p_rrh + pool_cans[t])->date.m == (p_rrd + i)->date.m
                         ) {
@@ -666,11 +685,21 @@ void kNN_MOF(
                 }
                 /******** filtering is done: *********/
                 if (n_can == 1) {
+                    /***
+                     * after candidates filtering, only one left.
+                    */
                     fragment = pool_cans[0];
                 } else {
                     // n_can == 0 or n_can > 1
                     if (n_can == 0) {
-                        // after cp and seasonality filtering, there is not candidates any more.
+                        /***
+                         * after cp and seasonality filtering, 
+                         *      there is not candidates any more 
+                         *      (toggle_cp always equals to 0).
+                         *      pool_cans remains unchanged.
+                         * Then we just discard the cp and seasonality filtering
+                         *      in order to make the disaggregation possible.
+                        */
                         n_can = n_cans_c;
                     }
                     /* kNN sampling, based on the qualified candidates pool */
@@ -706,13 +735,13 @@ int Toggle_CONTINUITY(
      *      p_gp: pointing to global parameter struct;
      *      ndays_h: number of days in hourly rr data;
      *      pool_cans: the pool of candidate index;
-     *      WD: matching flexcibility
+     *      WD: matching flexcibility, global parameter
      * Output:
      *      - the number of candidates (pool size)
      *      - bring back the pool_cans array
      * ***************/
     int i, j, k, skip, toggle_WD;
-    // toggle_WD: whether wet-dry status match
+    // toggle_WD: whether wet-dry status match; 1: match; 0: not match
     int n_cans=0;  // number of candidates fullfilling the CONTINUITY criteria (output)
     skip = (p_gp->CONTINUITY - 1) / 2; // p_gp->CONTINUITY == 1: skip=0; p_gp->CONTINUITY == 3: skip=1
     
@@ -731,17 +760,17 @@ int Toggle_CONTINUITY(
                             ((p_rrd + i)->p_rr[j] > 0.0) == ((p_rrh + k + i)->rr_d[j] > 0.0)
                         )
                     ) {
-                        toggle_WD = 0;
+                        toggle_WD = 0;break;
                     } else {
                         continue;
                     }
                 } else {
                     // WD == 1
-                    /*flexible wet-dry matching*/
+                    /* flexible wet-dry status matching*/
                     if (
                         ((p_rrd + i)->p_rr[j] > 0.0) && ((p_rrh + k + i)->rr_d[j] <= 0.0)
                     ) {
-                        toggle_WD = 0;
+                        toggle_WD = 0;break;
                     }
                 }
             }
@@ -762,7 +791,7 @@ int Toogle_CP(
 ){
     /*************
      * Description:
-     *      derive the cp value (class) of the day with the date
+     *      derive the cp value (class) of the day based on date stamp (y-m-d)
      * Parameters:
      *      date: a Date struct, conaining y, m and d
      *      p_cp: pointing to the cp data struct array
@@ -777,12 +806,12 @@ int Toogle_CP(
             (p_cp+i)->date.y == date.y && (p_cp+i)->date.m == date.m && (p_cp+i)->date.d == date.d
         ) {
             cp = (p_cp+i)->cp;
-            break;
+            break; // terminate the loop directly
         }
     }
     if (cp == -1) {
         printf(
-            "Program terminated: cannot find the cp class for the date %d-%d-%d\n",
+            "Program terminated: cannot find the cp class for the date %d-%02d-%02d\n",
             date.y, date.m, date.d
         );
         exit(0);
