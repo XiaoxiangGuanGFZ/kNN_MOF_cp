@@ -52,11 +52,11 @@ struct df_cp
 struct Para_global
     {
         /* global parameters */
-        char FP_DAILY[100];     // file path of daily precipitation data (to be disaggregated)
-        char FP_CP[100];        // file path of circulation pattern (CP) classification data series
-        char FP_HOURLY[100];    // file path of hourly precipitation data (as fragments)
-        char FP_OUT[100];       // file path of output(hourly) precipitation from disaggregation
-        char FP_LOG[100];       // file path of log file
+        char FP_DAILY[150];     // file path of daily precipitation data (to be disaggregated)
+        char FP_CP[150];        // file path of circulation pattern (CP) classification data series
+        char FP_HOURLY[150];    // file path of hourly precipitation data (as fragments)
+        char FP_OUT[150];       // file path of output(hourly) precipitation from disaggregation
+        char FP_LOG[150];       // file path of log file
         int N_STATION;          // number of stations (rain sites)
         char T_CP[10];          // toggle (flag), whether the CP is considered in the algorithm
         char SEASON[10];        // toggle (flag), whether the seasonality is considered in the algorithm
