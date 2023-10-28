@@ -6,8 +6,8 @@
 #include <time.h>
 
 
-# define MAXCHAR 4000
-# define MAXrow 30000  // almost 100 years long ts
+# define MAXCHAR 10000  // able to accomodate up to 3000 sites simultaneously
+# define MAXrow 100000  // almost 270 years long ts
 
 struct Date {
     int y;
@@ -184,7 +184,7 @@ void main(int argc, char * argv[]) {
     );
     /******* import circulation pattern series *********/
     
-    struct df_cp df_cps[MAXrow];
+    static struct df_cp df_cps[MAXrow];
     int nrow_cp=0;  // the number of CP data columns: 4 (y, m, d, cp)
     if (strcmp(p_gp->T_CP, "TRUE") == 0) {
         nrow_cp = import_df_cp(Para_df.FP_CP, df_cps);
@@ -211,7 +211,7 @@ void main(int argc, char * argv[]) {
     }
     /****** import daily rainfall data (to be disaggregated) *******/
     
-    struct df_rr_d df_rr_daily[MAXrow];
+    static struct df_rr_d df_rr_daily[MAXrow];
     int nrow_rr_d;
     nrow_rr_d = import_dfrr_d(
         Para_df.FP_DAILY, 
@@ -239,7 +239,7 @@ void main(int argc, char * argv[]) {
     /****** import hourly rainfall data (obs as fragments) *******/
     
     int ndays_h;
-    struct df_rr_h df_rr_hourly[MAXrow];
+    static struct df_rr_h df_rr_hourly[MAXrow];
     ndays_h = import_dfrr_h(Para_df.FP_HOURLY, Para_df.N_STATION, df_rr_hourly);
 
     time(&tm);
