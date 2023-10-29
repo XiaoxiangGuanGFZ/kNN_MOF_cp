@@ -1,3 +1,12 @@
+# ------ test run kNN_MOF_cp in powershell/ R ------
+ws <- "D:/kNN_MOF_cp/"
+fp_gp = paste0(ws, "data/global_para.txt")
+shellc = paste0(
+  ws, 'scr/main.exe ', fp_gp
+)
+status = system(shellc) 
+status
+
 
 # ------ performance evaluation ------
 # in case some error in disaggregation
