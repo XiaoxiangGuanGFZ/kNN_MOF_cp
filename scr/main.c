@@ -9,6 +9,25 @@
 # define MAXCHAR 10000  // able to accomodate up to 3000 sites simultaneously
 # define MAXrow 100000  // almost 270 years long ts
 
+/****** exit description *****
+ * void exit(int status);
+ * from <stdlib.h>
+ *  The exit() function takes a single argument, status, 
+ * which is an integer value. This status code is 
+ * returned to the parent process or the operating system. 
+ * By convention, a status code of 0 usually indicates successful execution, 
+ * and any other non-zero value typically indicates 
+ * an error or abnormal termination.
+ * --------
+ * 0: successfuly execution
+ * 1: file input or output error
+ * 2: algorithm error
+ *  
+*/
+
+/******
+ * the following define the structures
+*/
 struct Date {
     int y;
     int m;
@@ -133,7 +152,10 @@ void kNN_MOF(
         int nrow_cp
     );
 
-void main(int argc, char * argv[]) {
+/***************************************
+ * main function 
+*/
+int main(int argc, char * argv[]) {
     /*
     int argc: the number of parameters of main() function;
     char *argv[]: pointer array
@@ -166,7 +188,7 @@ void main(int argc, char * argv[]) {
     FILE *p_log;  // file pointer pointing to log file
     if ((p_log=fopen(p_gp->FP_LOG, "a+")) == NULL) {
         printf("cannot create / open log file\n");
-        exit(0);
+        exit(1);
     }
     printf("------ Global parameter import completed: %s", ctime(&tm));
     fprintf(p_log, "------ Global parameter import completed: %s", ctime(&tm));
@@ -279,7 +301,7 @@ void main(int argc, char * argv[]) {
     time(&tm);
     printf("------ Disaggregation daily2hourly (Done): %s", ctime(&tm));
     fprintf(p_log, "------ Disaggregation daily2hourly (Done): %s", ctime(&tm));
-
+    return 0; 
 }
 
 void import_global(
@@ -302,7 +324,7 @@ void import_global(
     
     if ((fp=fopen(fname, "r")) == NULL) {
         printf("cannot open global parameter file\n");
-        exit(0);
+        exit(1);
     }
     while (!feof(fp))
     {
@@ -349,7 +371,7 @@ void import_global(
                     printf(
                         "Error in opening global parameter file: unrecognized parameter field!"
                     );
-                    exit(0);
+                    exit(1);
                 }
             }
         }
@@ -377,7 +399,7 @@ int import_dfrr_d(
     FILE *fp_d;
     if ((fp_d=fopen(FP_daily, "r")) == NULL) {
         printf("Cannot open daily rr obs data file!\n");
-        exit(0);
+        exit(1);
     }
     // struct df_rr_d df_rr_daily[10000];
     char *token;
@@ -431,7 +453,7 @@ int import_dfrr_h(
     FILE *fp_h;
     if ((fp_h=fopen(FP_hourly, "r")) == NULL) {
         printf("Cannot open hourly rr data file!\n");
-        exit(0);
+        exit(1);
     }
     // struct df_rr_h df_rr_hourly[10000];
     struct df_rr_h *p_df_rr_h;  // pointer of df_rr_h; for iteration
@@ -516,7 +538,7 @@ int import_df_cp(
     int j;  
     if ((fp_cp=fopen(fname, "r")) == NULL) {
         printf("Cannot open cp data file\n");
-        exit(0);
+        exit(1);
     }
     j = 0;  // from the first row 
     p = p_df_cp;
@@ -573,7 +595,7 @@ void kNN_MOF(
     FILE *p_FP_OUT;
     if ((p_FP_OUT=fopen(p_gp->FP_OUT, "w")) == NULL) {
         printf("Program terminated: cannot create or open output file\n");
-        exit(0);
+        exit(1);
     }
     for (i=skip; i < nrow_rr_d-skip; i++) { //i=skip
         // iterate each (possible) target day
@@ -640,7 +662,7 @@ void kNN_MOF(
                 printf("the target day %d-%02d-%02d has no matching hourly candidate!\n",
                        (p_rrd + i)->date.y, (p_rrd + i)->date.m, (p_rrd + i)->date.d);
                 printf("Programm terminated!");
-                exit(0);
+                exit(2);
             } else if (n_cans_c == 1) {
                 /**
                  * only one candidate fits here after wet-dry status filtering 
@@ -827,7 +849,7 @@ int Toogle_CP(
             "Program terminated: cannot find the cp class for the date %d-%02d-%02d\n",
             date.y, date.m, date.d
         );
-        exit(0);
+        exit(2);
     }
     return cp;
 }
@@ -1065,3 +1087,4 @@ void Write_df_rr_h(
     }
     // printf("%d-%d-%d: Done\n", p_out->date.y, p_out->date.m, p_out->date.d); // print to screen (command line)
 }
+
