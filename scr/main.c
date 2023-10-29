@@ -117,6 +117,11 @@ void Write_df_rr_h(
     FILE *p_FP_OUT);
 
 double get_random(); // declare
+int weight_cdf_sample(
+    int size_pool,
+    int pool_cans[],
+    double *weights_cdf    
+);
 
 void kNN_MOF(
         struct df_rr_h *p_rrh,
@@ -613,6 +618,7 @@ void kNN_MOF(
                  * typically, WD == 1, flexible in wet-dry status filtering 
                  */
             );
+            // printf("number of candidates after continuity filtering (n_cans_c): %d\n", n_cans_c);
             // printf("WD-0: ncan: %d\n", n_cans_c);
             if (n_cans_c < 2 && p_gp->WD == 0) {
                 /***
@@ -631,9 +637,10 @@ void kNN_MOF(
                 // printf("WD-1: ncan: %d\n", n_cans_c);
             }
             if (n_cans_c == 0) {
-                printf("the target day %d-%d-%d has no matching hourly candidate!\n", 
-                (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d);
-                printf("Programm terminated!"); exit(0);
+                printf("the target day %d-%02d-%02d has no matching hourly candidate!\n",
+                       (p_rrd + i)->date.y, (p_rrd + i)->date.m, (p_rrd + i)->date.d);
+                printf("Programm terminated!");
+                exit(0);
             } else if (n_cans_c == 1) {
                 /**
                  * only one candidate fits here after wet-dry status filtering 
@@ -683,6 +690,11 @@ void kNN_MOF(
                         n_can++;
                     }
                 }
+                // printf("number of candidates after all filtering (n_can): %d\n", n_can);
+                /* printf("Candidates: \n");
+                for (int ii = 0; ii < n_can; ii++) {
+                    printf("%d\n", pool_cans[ii]);
+                } */ 
                 /******** filtering is done: *********/
                 if (n_can == 1) {
                     /***
@@ -842,17 +854,21 @@ int kNN_sampling(
      * Output:
      *      return a sampled index (fragments source)
      * ***********/
-    int i, j;
-    int temp_c;
+    int i, j;  // iteration variable
+    int temp_c;  // temporary variable during sorting 
     double temp_d;
-    double distance[MAXrow];
+    double rd = 0.0;  // a random decimal value between 0.0 and 1.0
+
+    double distance[MAXrow]; // the distance between target day and candidate days
     int size_pool; // the k in kNN
-    int index_out;
+    int index_out; // the output of this function: the sampled fragment from candidates pool
+    /**manhattan distance*/
     for (i=0; i<n_can; i++){
         *(distance+i) = 0.0;
         for (j=0; j<p_gp->N_STATION; j++){
             *(distance+i) += fabs(p_rrd->p_rr[j] - (p_rrh + pool_cans[i])->rr_d[j]);
         }
+        // printf("candidate index: %d, distance: %.2f\n", pool_cans[i], *(distance+i));
     }
     // sort the distance in the increasing order
     for (i=0; i<n_can-1; i++) {
@@ -863,15 +879,30 @@ int kNN_sampling(
             }
         }
     }
+    /*
+    printf("--------------after sorting---------\n");
+    for (i=0; i<n_can;i++) {
+        printf("candidate index: %d, distance: %.2f\n", pool_cans[i], *(distance+i));
+    }
+    */
     if (distance[0] <= 0.0) {
         // the closest candidate with the distance of 0.0, then we skip the weighted sampling.
         index_out = pool_cans[0];
     } else {
-        size_pool = (int)sqrt(n_can) + 1; // final candidates pool size
-        /*compute the weights for kNN sampling*/
+        /***
+         * the size of candidate pool in kNN algorithm
+         *      the range of size_pool:
+         *      [2, n_can]
+        */
+        size_pool = (int)sqrt(n_can) + 1; 
+        /***
+         * compute the weights for kNN sampling
+         *      the weight is defined as distance inverse
+         * dynamic memory allocation for the double array - weights
+         * */
         double *weights;
-        weights = malloc(size_pool * sizeof(double));
-        double w_sum=0.0; 
+        weights = malloc(size_pool * sizeof(double)); // a double array with the size of size_pool
+        double w_sum=0.0; // the sum of the inversed distances
         for (i=0; i<size_pool; i++){
             *(weights+i) = 1/distance[i];
             w_sum += 1/distance[i];
@@ -887,28 +918,54 @@ int kNN_sampling(
             *(weights_cdf + i) = *(weights_cdf + i-1) + weights[i];
         }
         /* generate a random number, then an fragments index*/
-        
-        srand(time(NULL)); // randomize seed
-        double rd = 0;
-        rd = get_random(); // call the function to get a different value of n every time
-
-        if (rd <= weights_cdf[0])
+        int toggle = 0;
+        while (toggle == 0)
         {
-            index_out = pool_cans[0];
-        }
-        else
-        {
-            for (i = 1; i < size_pool; i++)
+            toggle = 1;
+            index_out = weight_cdf_sample(size_pool, pool_cans, weights_cdf);
+            for (j = 0; j < p_gp->N_STATION; j++)
             {
-                if (rd<=weights_cdf[i] && rd > weights_cdf[i-1]) {index_out = pool_cans[i];break;}
+                if (p_rrd->p_rr[j] > 0.0 && (p_rrh + index_out)->rr_d[j] <= 0.0)
+                {
+                    toggle = 0;
+                    break;
+                }
             }
-        }
+        }    
     }
     
     return index_out;
 }
 
 double get_random() { return ((double)rand() / (double)RAND_MAX); }
+int weight_cdf_sample(
+    int size_pool,
+    int pool_cans[],
+    double *weights_cdf    
+) {
+    int i;
+    double rd = 0.0;  // a random decimal value between 0.0 and 1.0
+    int index_out; // the output of this function: the sampled fragment from candidates pool
+
+    // srand(time(NULL)); // randomize seed
+    rd = get_random(); // call the function to get a different value of n every time
+    if (rd <= weights_cdf[0])
+    {
+        index_out = pool_cans[0];
+    }
+    else
+    {
+        for (i = 1; i < size_pool; i++)
+        {
+            if (rd <= weights_cdf[i] && rd > weights_cdf[i - 1])
+            {
+                index_out = pool_cans[i];
+                break;
+            }
+        }
+    }
+    return index_out;
+}
 
 void Fragment_assign(
     struct df_rr_h *p_rrh,
@@ -927,8 +984,27 @@ void Fragment_assign(
      * Output:
      *      p_out
      * *******/
-    int j,h,toggle;
-    toggle = 1;
+    int j,h;
+    for (j = 0; j < p_gp->N_STATION; j++)
+    {
+        if (p_out->rr_d[j] > 0.0)
+        {
+            for (h = 0; h < 24; h++)
+            {
+                p_out->rr_h[j][h] = p_out->rr_d[j] * (p_rrh + fragment)->rr_h[j][h] / (p_rrh + fragment)->rr_d[j];
+            }
+        }
+        else
+        {
+            // no rain at the station j
+            for (h = 0; h < 24; h++)
+            {
+                p_out->rr_h[j][h] = 0.0;
+            }
+        }
+    }
+    /*
+    int toggle = 1;
     for (j=0; j<p_gp->N_STATION;j++) {
         if (p_out->rr_d[j] > 0.0 && (p_rrh + fragment)->rr_d[j] <= 0.0 ) {
             toggle = 0;
@@ -948,11 +1024,9 @@ void Fragment_assign(
         }
     } else {
         printf("The target day %d-%02d-%02d disaggregation failed, please check or retry!\n---Programm terminated!", 
-        p_out->date.y, p_out->date.m, p_out->date.d);
+            p_out->date.y, p_out->date.m, p_out->date.d);
         exit(0);
-    }
-    
-    // printf("hourly example: %f,%f,%f,%f\n", p_out->rr_h[0][0],p_out->rr_h[1][0],p_out->rr_h[2][0],p_out->rr_h[3][0]);
+    } */
 }
 void Write_df_rr_h(
     struct df_rr_h *p_out,
