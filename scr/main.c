@@ -725,7 +725,8 @@ void kNN_MOF(
         /* write the disaggregation output */
         Write_df_rr_h(&df_rr_h_out, p_gp, p_FP_OUT);
         printf("%d-%02d-%02d: Done!\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d);
-        // printf("%d-%d-%d: %d\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d, n_can);
+        
+        free(df_rr_h_out.rr_h);  // free the memory allocated for disaggregated hourly output
     }
     fclose(p_FP_OUT);
 }
@@ -859,7 +860,9 @@ int kNN_sampling(
     double temp_d;
     double rd = 0.0;  // a random decimal value between 0.0 and 1.0
 
-    double distance[MAXrow]; // the distance between target day and candidate days
+    // double distance[MAXrow]; 
+    double *distance;  // the distance between target day and candidate days
+    distance = malloc(n_can * sizeof(double));
     int size_pool; // the k in kNN
     int index_out; // the output of this function: the sampled fragment from candidates pool
     /**manhattan distance*/
@@ -932,8 +935,10 @@ int kNN_sampling(
                 }
             }
         }    
+        free(weights);
+        free(weights_cdf);
     }
-    
+    free(distance);
     return index_out;
 }
 
