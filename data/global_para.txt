@@ -5,7 +5,7 @@
 
 # ------- disaggregation setup ---------
 # the file path and name of daily rr data to be disaggregated
-FP_DAILY,D:/kNN_MOF_cp/data/rr_obs_daily.csv
+FP_DAILY,D:/kNN_MOF_cp/data/rr_sim_daily.csv
 
 # the file path and name of the circulation pattern classification data
 FP_CP,D:/kNN_MOF_cp/data/cp_series.csv
