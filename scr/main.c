@@ -530,21 +530,6 @@ int import_dfrr_h(
             }
         }
     }
-    /* check the results */ 
-    // p_df_rr_h = p_rr_h + 16;
-    // printf("%d-%d-%d: \n", p_df_rr_h->date.y, p_df_rr_h->date.m, p_df_rr_h->date.d);
-    // for (h=0; h < 24; h++) {
-    //     printf("H: %d\n", h);
-    //     for (j=0; j < N_STATION; j++){
-    //         printf("%3.1f\t", p_df_rr_h->rr_h[j][h]);
-    //     }
-    //     printf("\n");
-    // }
-    // printf("daily: \n");
-    // for (j=0; j < N_STATION; j++){
-    //         printf("%3.1f\t", p_df_rr_h->rr_d[j]);
-    // }
-    // printf("\n");
 
     return ndays; // the last is null
 }
@@ -565,31 +550,24 @@ int import_df_cp(
     FILE *fp_cp;
     char row[MAXCHAR];
     char *token;
-    struct df_cp *p;  // struct pointer for iteration
-    int j;  
+    int j = 0;  // from the first row 
     if ((fp_cp=fopen(fname, "r")) == NULL) {
-        printf("Cannot open cp data file\n");
+        printf("Cannot open cp data file: %s\n", fname);
         exit(1);
     }
-    j = 0;  // from the first row 
-    p = p_df_cp;
-    while (!feof(fp_cp))
+    while (fgets(row, MAXCHAR, fp_cp) != NULL)
     {
         // the fgets() function comes from <stdbool.h>
         // Reads characters from stream and stores them as a C string
-        fgets(row, MAXCHAR, fp_cp); 
         token = strtok(row, ",");  
-        p->date.y = atoi(token);
-        p->date.m = atoi(strtok(NULL, ","));
-        p->date.d = atoi(strtok(NULL, ","));
-        p->cp = atoi(strtok(NULL, ","));
-        /*
-        strtok() fucntion: https://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
-        */
-        p++; j++;
-    }
+        p_df_cp[j].date.y = atoi(token);
+        p_df_cp[j].date.m = atoi(strtok(NULL, ","));
+        p_df_cp[j].date.d = atoi(strtok(NULL, ","));
+        p_df_cp[j].cp = atoi(strtok(NULL, ","));
+        j++;
+    } 
     fclose(fp_cp);
-    return j - 1;  // the number of rows; the last row is null
+    return j;  // the number of rows; the last row is null
 }
 
 void kNN_MOF(
