@@ -409,8 +409,6 @@ void removeLeadingSpaces(char *str) {
     }
 }
 
-
-
 int import_dfrr_d(
     char FP_daily[], 
     int N_STATION,
@@ -429,18 +427,16 @@ int import_dfrr_d(
     // char FP_daily[]="D:/kNN_MOF_cp/data/rr_obs_daily.csv";  // key parameter
     FILE *fp_d;
     if ((fp_d=fopen(FP_daily, "r")) == NULL) {
-        printf("Cannot open daily rr obs data file!\n");
+        printf("Cannot open daily rr data file: %s\n", FP_daily);
         exit(1);
     }
     // struct df_rr_d df_rr_daily[10000];
     char *token;
     char row[MAXCHAR];
-    int i, j, nrow;
-    // int N_STATION = 134;  // key parameter
-
-    i=0;
-    while (!feof(fp_d)) {
-        fgets(row, MAXCHAR, fp_d);
+    int i, j;
+    i=0;  // record the number of rows in the data file
+    while (fgets(row, MAXCHAR, fp_d) != NULL)
+    {
         (p_rr_d + i)->date.y = atoi(strtok(row, ","));  //df_rr_daily[i].
         (p_rr_d + i)->date.m = atoi(strtok(NULL, ","));
         (p_rr_d + i)->date.d = atoi(strtok(NULL, ","));
@@ -450,19 +446,10 @@ int import_dfrr_d(
             token = strtok(NULL, ",");
             *((p_rr_d + i)->p_rr + j) = atof(token);
         }
-        i=i+1;
+        i++;
     }
-    nrow = i-1;
     fclose(fp_d);
-    
-    // for (i=16;i < 17;i++) {
-    //     printf("\ndate: %d-%d-%d: \n", (p_rr_d + i)->date.y, (p_rr_d + i)->date.m, (p_rr_d + i)->date.d);
-    //     for (j=0; j < N_STATION; j++) {
-    //         printf("%3.1f\t", *((p_rr_d + i)->p_rr+j));
-    //     }
-    // }
-    printf("\n");
-    return nrow;
+    return i;
 }
 
 int import_dfrr_h(
