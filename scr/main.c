@@ -214,7 +214,7 @@ int main(int argc, char * argv[]) {
     
     static struct df_cp df_cps[MAXrow];
     int nrow_cp=0;  // the number of CP data columns: 4 (y, m, d, cp)
-    if (strcmp(p_gp->T_CP, "TRUE") == 0) {
+    if (strncmp(p_gp->T_CP, "TRUE", 4) == 0) {
         nrow_cp = import_df_cp(Para_df.FP_CP, df_cps);
         time(&tm);
         printf("------ Import CP data series (Done): %s", ctime(&tm)); 
@@ -358,25 +358,25 @@ void import_global(
                 token = strtok(row, ",");   // the first column: key
                 token2 = strtok(NULL, ",\n");  // the second column: value
                 // printf("token: %s\n", token);
-                if (strcmp(token, "FP_DAILY") == 0) {
+                if (strncmp(token, "FP_DAILY", 8) == 0) {
                     strcpy(p_gp->FP_DAILY, token2);
-                } else if (strcmp(token, "FP_CP") == 0) {
+                } else if (strncmp(token, "FP_CP", 5) == 0) {
                     strcpy(p_gp->FP_CP, token2);
-                } else if (strcmp(token, "FP_HOURLY") == 0) {
+                } else if (strncmp(token, "FP_HOURLY", 9) == 0) {
                     strcpy(p_gp->FP_HOURLY, token2);
-                } else if (strcmp(token, "SEASON") == 0) {
+                } else if (strncmp(token, "SEASON", 6) == 0) {
                     strcpy(p_gp->SEASON, token2);
-                } else if (strcmp(token, "T_CP") == 0) {
+                } else if (strncmp(token, "T_CP", 4) == 0) {
                     strcpy(p_gp->T_CP, token2);
-                } else if (strcmp(token, "N_STATION") == 0) {
+                } else if (strncmp(token, "N_STATION", 9) == 0) {
                     p_gp->N_STATION = atoi(token2);
-                } else if (strcmp(token, "WD") == 0) {
+                } else if (strncmp(token, "WD", 2) == 0) {
                     p_gp->WD = atoi(token2);
-                } else if (strcmp(token, "FP_OUT") == 0) {
+                } else if (strncmp(token, "FP_OUT", 6) == 0) {
                     strcpy(p_gp->FP_OUT, token2);
-                } else if (strcmp(token, "FP_LOG") == 0) {
+                } else if (strncmp(token, "FP_LOG",6) == 0) {
                     strcpy(p_gp->FP_LOG, token2);
-                } else if (strcmp(token, "CONTINUITY") == 0) {
+                } else if (strncmp(token, "CONTINUITY", 10) == 0) {
                     p_gp->CONTINUITY = atoi(token2);   
                 } else {
                     printf(
@@ -707,13 +707,13 @@ void kNN_MOF(
                 n_can=0;
                 for (int t = 0; t < n_cans_c; t++) {
                     toggle_cp = 0; // initialize the toggle_cp for every iteration
-                    if (strcmp(p_gp->T_CP, "TRUE") == 0) {
+                    if (strncmp(p_gp->T_CP, "TRUE", 4) == 0) {
                         // disaggregation conditioned on circulation pattern classification
                         if (
                             Toogle_CP( (p_rrh + pool_cans[t])->date, p_cp, nrow_cp ) == Toogle_CP( (p_rrd + i)->date, p_cp, nrow_cp )
                         ) {
                             // only continue when target and candidate day share the same cp class.
-                            if (strcmp(p_gp->SEASON, "TRUE") == 0) {
+                            if (strncmp(p_gp->SEASON, "TRUE", 4) == 0) {
                                 // seasonality: summer and winter
                                 if (
                                     ((p_rrh + pool_cans[t])->date.m >= 5 && (p_rrh + pool_cans[t])->date.m <= 10) == 
