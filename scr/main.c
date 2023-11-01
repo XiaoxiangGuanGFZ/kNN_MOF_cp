@@ -324,10 +324,9 @@ void import_global(
     int i;
     
     if ((fp=fopen(fname, "r")) == NULL) {
-        printf("cannot open global parameter file\n");
+        printf("cannot open global parameter file: %s\n", fname);
         exit(1);
     }
-    // row[0] = '\0'; // initialize the row each time 
     while (fgets(row, MAXCHAR, fp) != NULL)
     {
         // the fgets() function comes from <stdbool.h>
