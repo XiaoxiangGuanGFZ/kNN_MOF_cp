@@ -331,21 +331,29 @@ void import_global(
     {
         // the fgets() function comes from <stdbool.h>
         // Reads characters from stream and stores them as a C string
-        fgets(row, MAXCHAR, fp); 
+        row[0] = '\0'; // initialize the row each time 
+        fgets(row, MAXCHAR, fp);
+        /***
+         * removeLeadingSpaces():
+         * remove all the leading white spaces in the string if exist,
+         * otherwise do nothing!
+        */
         removeLeadingSpaces(row);
+
         if (row != NULL && strlen(row) > 1) {
             /*non-empty row(string)*/
             if (row[0] != '#') {
                 /* the first character of row should not be # */
-                for (i=0;i<strlen(row);i++) {
+                for (i = 0; i < strlen(row); i++)
+                {
                     /* remove (or hide) all the characters after # */
-                    if (row[i] == '#') {
+                    if (row[i] == '#')
+                    {
                         row[i] = '\0';
                         break;
                     }
                 }
-                // printf("it is a valid row!\n");
-                // printf("Row: %s", row);
+                // puts(row);
                 /*assign the values to the parameter structure: key-value pairs*/
                 token = strtok(row, ",");   // the first column: key
                 token2 = strtok(NULL, ",\n");  // the second column: value
