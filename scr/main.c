@@ -470,21 +470,17 @@ int import_dfrr_h(
     // char FP_hourly[]="D:/kNN_MOF_cp/data/rr_obs_hourly.csv";
     FILE *fp_h;
     if ((fp_h=fopen(FP_hourly, "r")) == NULL) {
-        printf("Cannot open hourly rr data file!\n");
+        printf("Cannot open hourly rr data file: %s\n", FP_hourly);
         exit(1);
     }
-    // struct df_rr_h df_rr_hourly[10000];
-    struct df_rr_h *p_df_rr_h;  // pointer of df_rr_h; for iteration
-    
     char *token;
     char row[MAXCHAR];
-    int i, j, h, nrow_total, ndays;
-    // int N_STATION = 134;
-    
-    i=0;
+    int j, h, nrow_total, ndays;
+    int i = 0;
+
+    struct df_rr_h *p_df_rr_h;  // pointer of df_rr_h; for iteration
     p_df_rr_h = p_rr_h; // initialize
-    while (!feof(fp_h)) {
-        fgets(row, MAXCHAR, fp_h);
+    while (fgets(row, MAXCHAR, fp_h) != NULL) {
         if (i%24 == 0) {
             /* %: remainder after division (modulo division)*/
             (p_df_rr_h->date).y = atoi(strtok(row, ","));
@@ -492,6 +488,7 @@ int import_dfrr_h(
             (p_df_rr_h->date).d = atoi(strtok(NULL, ","));
             p_df_rr_h->rr_h = calloc(N_STATION, sizeof(double) * 24);  // allocate memory (stack)
         } else {
+            // just skip the date (y, m, d)
             token = strtok(row, ","); token = strtok(NULL, ","); token = strtok(NULL, ",");
         }
         h = atoi(strtok(NULL, ","));
@@ -502,7 +499,7 @@ int import_dfrr_h(
         if (i%24 == 23) {
             p_df_rr_h++;
         }
-        i=i+1;
+        i++;
     }
     fclose(fp_h);
     nrow_total = i;  // the total number of row in the data file
@@ -517,7 +514,6 @@ int import_dfrr_h(
             }
         }
     }
-
     return ndays; // the last is null
 }
 
