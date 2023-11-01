@@ -194,10 +194,10 @@ int main(int argc, char * argv[]) {
     fprintf(p_log, "------ Global parameter import completed: %s", ctime(&tm));
 
     printf(
-        "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP: %s\nFP_OUT: %s\nFP_LOG: %s\n",
+        "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP:    %s\nFP_OUT:   %s\nFP_LOG:   %s\n",
         p_gp->FP_DAILY, p_gp->FP_HOURLY, p_gp->FP_CP, p_gp->FP_OUT, p_gp->FP_LOG
     );
-    fprintf(p_log, "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP: %s\nFP_OUT: %s\nFP_LOG: %s\n",
+    fprintf(p_log, "FP_DAILY: %s\nFP_HOULY: %s\nFP_CP:    %s\nFP_OUT:   %s\nFP_LOG:   %s\n",
         p_gp->FP_DAILY, p_gp->FP_HOURLY, p_gp->FP_CP, p_gp->FP_OUT, p_gp->FP_LOG);
 
     printf(
@@ -225,10 +225,10 @@ int main(int argc, char * argv[]) {
         printf("* the first day: %d-%02d-%02d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
         fprintf(p_log, "* the first day: %d-%02d-%02d \n", df_cps[0].date.y, df_cps[0].date.m, df_cps[0].date.d);
         
-        printf("* the last day: %d-%02d-%02d \n", 
+        printf("* the last day:  %d-%02d-%02d \n", 
             df_cps[nrow_cp-1].date.y, df_cps[nrow_cp-1].date.m, df_cps[nrow_cp-1].date.d
         );
-        fprintf(p_log, "* the last day: %d-%02d-%02d \n", 
+        fprintf(p_log, "* the last day:  %d-%02d-%02d \n", 
             df_cps[nrow_cp-1].date.y, df_cps[nrow_cp-1].date.m, df_cps[nrow_cp-1].date.d
         );
     } else {
@@ -254,12 +254,12 @@ int main(int argc, char * argv[]) {
     fprintf(p_log, "* the first day: %d-%02d-%02d\n", df_rr_daily[0].date.y,df_rr_daily[0].date.m,df_rr_daily[0].date.d);
 
     printf(
-        "* the last day: %d-%02d-%02d\n", 
+        "* the last day:  %d-%02d-%02d\n", 
         df_rr_daily[nrow_rr_d-1].date.y,df_rr_daily[nrow_rr_d-1].date.m,df_rr_daily[nrow_rr_d-1].date.d
     );
     fprintf(
         p_log,
-        "* the last day: %d-%02d-%02d\n", 
+        "* the last day:  %d-%02d-%02d\n", 
         df_rr_daily[nrow_rr_d-1].date.y,df_rr_daily[nrow_rr_d-1].date.m,df_rr_daily[nrow_rr_d-1].date.d
     );
     
@@ -278,12 +278,12 @@ int main(int argc, char * argv[]) {
     fprintf(p_log, "* the first day: %d-%02d-%02d\n", df_rr_hourly[0].date.y, df_rr_hourly[0].date.m, df_rr_hourly[0].date.d);
     
     printf(
-        "* the last day: %d-%02d-%02d\n", 
+        "* the last day:  %d-%02d-%02d\n", 
         df_rr_hourly[ndays_h-1].date.y, df_rr_hourly[ndays_h-1].date.m, df_rr_hourly[ndays_h-1].date.d
     );
     fprintf(
         p_log,
-        "* the last day: %d-%02d-%02d\n", 
+        "* the last day:  %d-%02d-%02d\n", 
         df_rr_hourly[ndays_h-1].date.y, df_rr_hourly[ndays_h-1].date.m, df_rr_hourly[ndays_h-1].date.d
     );
 
@@ -336,9 +336,10 @@ void import_global(
             if (row[0] != '#') {
                 /* the first character of row should not be # */
                 for (i=0;i<strlen(row);i++) {
-                    /* remove all the characters after # */
+                    /* remove (or hide) all the characters after # */
                     if (row[i] == '#') {
                         row[i] = '\0';
+                        break;
                     }
                 }
                 // printf("it is a valid row!\n");
