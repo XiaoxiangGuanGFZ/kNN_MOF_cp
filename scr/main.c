@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
-
+#include <ctype.h>
 
 # define MAXCHAR 10000  // able to accomodate up to 3000 sites simultaneously
 # define MAXrow 100000  // almost 270 years long ts
@@ -86,6 +86,7 @@ struct Para_global
 /* ---- function declaration ---- */
 // data import functions
 void import_global(char fname[], struct Para_global *p_gp);  // function declaration
+void removeLeadingSpaces(char *str);
 int import_df_cp(
         char fname[],
         struct df_cp *p_df_cp
@@ -331,6 +332,7 @@ void import_global(
         // the fgets() function comes from <stdbool.h>
         // Reads characters from stream and stores them as a C string
         fgets(row, MAXCHAR, fp); 
+        removeLeadingSpaces(row);
         if (row != NULL && strlen(row) > 1) {
             /*non-empty row(string)*/
             if (row[0] != '#') {
@@ -380,6 +382,26 @@ void import_global(
     fclose(fp);
     
 }
+void removeLeadingSpaces(char *str) {
+    if (str != NULL) {
+        int i, j = 0;
+        int len = strlen(str);
+        // Find the first non-space character
+        for (i = 0; i < len && isspace(str[i]); i++)
+        {
+            // Do nothing, just iterate until the first non-space character is found
+        }
+        // Shift the string to remove leading spaces
+        for (; i < len; i++)
+        {
+            str[j++] = str[i];
+        }
+        // Null-terminate the modified string
+        str[j] = '\0';
+    }
+}
+
+
 
 int import_dfrr_d(
     char FP_daily[], 
