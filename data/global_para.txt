@@ -39,4 +39,3 @@ CONTINUITY,1
 # WD:0 very strict, only the candidates with exact the same wet-dry status of target day can be selected
 # WD:1 flexible, the candidates with same wet-dry status covering that of target day will be selected
 WD,1
-
