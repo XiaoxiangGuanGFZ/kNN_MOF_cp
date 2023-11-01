@@ -327,12 +327,12 @@ void import_global(
         printf("cannot open global parameter file\n");
         exit(1);
     }
-    while (!feof(fp))
+    // row[0] = '\0'; // initialize the row each time 
+    while (fgets(row, MAXCHAR, fp) != NULL)
     {
         // the fgets() function comes from <stdbool.h>
         // Reads characters from stream and stores them as a C string
-        row[0] = '\0'; // initialize the row each time 
-        fgets(row, MAXCHAR, fp);
+        
         /***
          * removeLeadingSpaces():
          * remove all the leading white spaces in the string if exist,
