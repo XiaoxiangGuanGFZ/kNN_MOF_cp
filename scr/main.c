@@ -355,7 +355,7 @@ void import_global(
                 // puts(row);
                 /*assign the values to the parameter structure: key-value pairs*/
                 token = strtok(row, ",");   // the first column: key
-                token2 = strtok(NULL, ",\n");  // the second column: value
+                token2 = strtok(NULL, ",\r\n");  // the second column: value
                 // printf("token: %s\n", token);
                 if (strncmp(token, "FP_DAILY", 8) == 0) {
                     strcpy(p_gp->FP_DAILY, token2);
