@@ -6,3 +6,7 @@
 
 /my.log
 
+#--- cmake 
+/scr/CMakeFiles/
+/scr/CMakeCache.txt
+/scr/cmake_install.cmake
