@@ -4,7 +4,7 @@
 /output/
 /scr/*.exe
 
-/my.log
+my.log
 
 #--- cmake 
 /scr/CMakeFiles/
