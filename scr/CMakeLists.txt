@@ -11,8 +11,9 @@ set(CMAKE_CXX_COMPILER "C:/MinGW/bin/g++.exe")  # Uncomment and replace "path/to
 
 # Add your source files here
 set(SOURCE_FILES
-    main_dis.c
+    main.c
     Func_dataIO.c
+    Func_Initialize.c
     Func_kNN_MOF_cp.c
 )
 

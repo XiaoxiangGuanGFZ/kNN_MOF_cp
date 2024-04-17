@@ -128,6 +128,30 @@ kNN_MOF_cp/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/build
 .PHONY : kNN_MOF_cp/fast
 
+Func_Initialize.obj: Func_Initialize.c.obj
+.PHONY : Func_Initialize.obj
+
+# target to build an object file
+Func_Initialize.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/Func_Initialize.c.obj
+.PHONY : Func_Initialize.c.obj
+
+Func_Initialize.i: Func_Initialize.c.i
+.PHONY : Func_Initialize.i
+
+# target to preprocess a source file
+Func_Initialize.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/Func_Initialize.c.i
+.PHONY : Func_Initialize.c.i
+
+Func_Initialize.s: Func_Initialize.c.s
+.PHONY : Func_Initialize.s
+
+# target to generate assembly for a file
+Func_Initialize.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/Func_Initialize.c.s
+.PHONY : Func_Initialize.c.s
+
 Func_dataIO.obj: Func_dataIO.c.obj
 .PHONY : Func_dataIO.obj
 
@@ -176,29 +200,29 @@ Func_kNN_MOF_cp.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/Func_kNN_MOF_cp.c.s
 .PHONY : Func_kNN_MOF_cp.c.s
 
-main_dis.obj: main_dis.c.obj
-.PHONY : main_dis.obj
+main.obj: main.c.obj
+.PHONY : main.obj
 
 # target to build an object file
-main_dis.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/main_dis.c.obj
-.PHONY : main_dis.c.obj
+main.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/main.c.obj
+.PHONY : main.c.obj
 
-main_dis.i: main_dis.c.i
-.PHONY : main_dis.i
+main.i: main.c.i
+.PHONY : main.i
 
 # target to preprocess a source file
-main_dis.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/main_dis.c.i
-.PHONY : main_dis.c.i
+main.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/main.c.i
+.PHONY : main.c.i
 
-main_dis.s: main_dis.c.s
-.PHONY : main_dis.s
+main.s: main.c.s
+.PHONY : main.s
 
 # target to generate assembly for a file
-main_dis.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/main_dis.c.s
-.PHONY : main_dis.c.s
+main.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\kNN_MOF_cp.dir\build.make CMakeFiles/kNN_MOF_cp.dir/main.c.s
+.PHONY : main.c.s
 
 # Help Target
 help:
@@ -209,15 +233,18 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... kNN_MOF_cp
+	@echo ... Func_Initialize.obj
+	@echo ... Func_Initialize.i
+	@echo ... Func_Initialize.s
 	@echo ... Func_dataIO.obj
 	@echo ... Func_dataIO.i
 	@echo ... Func_dataIO.s
 	@echo ... Func_kNN_MOF_cp.obj
 	@echo ... Func_kNN_MOF_cp.i
 	@echo ... Func_kNN_MOF_cp.s
-	@echo ... main_dis.obj
-	@echo ... main_dis.i
-	@echo ... main_dis.s
+	@echo ... main.obj
+	@echo ... main.i
+	@echo ... main.s
 .PHONY : help
 
 
