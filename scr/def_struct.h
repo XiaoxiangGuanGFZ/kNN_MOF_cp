@@ -21,6 +21,9 @@ struct df_rr_d
      */
     struct Date date;    
     double *p_rr;
+    int cp;
+    int season;
+    int class;
 };
 struct df_rr_h
 {
@@ -35,6 +38,9 @@ struct df_rr_h
     struct Date date;    
     double (*rr_h)[24];
     double *rr_d;
+    int cp;
+    int season;
+    int class;
 };
 
 struct df_cp
@@ -58,8 +64,12 @@ struct Para_global
         int N_STATION;          // number of stations (rain sites)
         char T_CP[10];          // toggle (flag), whether the CP is considered in the algorithm
         char SEASON[10];        // toggle (flag), whether the seasonality is considered in the algorithm
+        int SUMMER_FROM;        // the beginning month of summer
+        int SUMMER_TO;          // the end month of summer
         int CONTINUITY;         // continuity day
         int WD;                 // the flexibility level of wet-dry status in candidates filtering
+        int RUN;                // simulation runs 
+        int CLASS_N;            // total categories the series is classified into
     };
 
 
@@ -67,73 +77,4 @@ struct Para_global
 
 
 
-
-/* ---- function declaration ---- */
-// data import functions
-void import_global(char fname[], struct Para_global *p_gp);  // function declaration
-void removeLeadingSpaces(char *str);
-int import_df_cp(
-        char fname[],
-        struct df_cp *p_df_cp
-    );
-int import_dfrr_d(
-        char FP_daily[], 
-        int N_STATION,
-        struct df_rr_d *p_rr_d
-    );  // declare
-int import_dfrr_h(
-        char FP_hourly[], 
-        int N_STATION,
-        struct df_rr_h *p_rr_h
-    );
-
-void Write_df_rr_h(
-    struct df_rr_h *p_out,
-    struct Para_global *p_gp,
-    FILE *p_FP_OUT);
-
-// kNN_MOF_cp algorithm functions
-int Toggle_CONTINUITY(
-        struct df_rr_h *p_rrh,
-        struct df_rr_d *p_rrd,
-        struct Para_global *p_gp,
-        int ndays_h,
-        int pool_cans[],
-        int WD
-    );
-
-int Toogle_CP(
-    struct Date date,
-    struct df_cp *p_cp,
-    int nrow_cp);
-
-int kNN_sampling(
-    struct df_rr_d *p_rrd,
-    struct df_rr_h *p_rrh,
-    struct Para_global *p_gp,
-    int pool_cans[],
-    int n_can);
-
-void Fragment_assign(
-    struct df_rr_h *p_rrh,
-    struct df_rr_h *p_out,
-    struct Para_global *p_gp,
-    int fragment);
-
-double get_random(); // declare
-int weight_cdf_sample(
-    int size_pool,
-    int pool_cans[],
-    double *weights_cdf    
-);
-
-void kNN_MOF(
-        struct df_rr_h *p_rrh,
-        struct df_rr_d *p_rrd,
-        struct df_cp *p_cp,
-        struct Para_global *p_gp,
-        int nrow_rr_d,
-        int ndays_h,
-        int nrow_cp
-    );
 
