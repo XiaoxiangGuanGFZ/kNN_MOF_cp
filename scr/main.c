@@ -2,12 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <math.h>
 #include <time.h>
-#include <ctype.h>
-
-# define MAXCHAR 10000  // able to accomodate up to 3000 sites simultaneously
-# define MAXrow 100000  // almost 270 years long ts
+#include "def_struct.h"
+#include "Func_dataIO.h"
+#include "Func_Initialize.h"
+#include "Func_kNN_MOF_cp.h"
 
 /****** exit description *****
  * void exit(int status);
@@ -25,133 +24,7 @@
  *  
 */
 
-/******
- * the following define the structures
-*/
-struct Date {
-    int y;
-    int m;
-    int d;
-};
-struct df_rr_d
-{
-    /* data
-     * data frame for the daily step precipitation,
-     * p_rr points to a double-type array, 
-     *      with the size equal to the number of stations 
-     */
-    struct Date date;    
-    double *p_rr;
-};
-struct df_rr_h
-{
-    /* data
-     * dataframe for the hourly step precipitation, 
-     * rr_h: pointer array; 
-     *      24 double-type pointers; 
-     *      each points to an array of hourly precipitation (all rain sites)
-     * rr_d: double-type pointer;
-     *      pointing to an array of daily precipitation (all rain site) aggregated from rr_h
-     */
-    struct Date date;    
-    double (*rr_h)[24];
-    double *rr_d;
-};
-
-struct df_cp
-{
-    /* 
-     * circulation pattern classficiation series
-     * each day with a CP class
-     */
-    struct Date date;    
-    int cp;
-};
-
-struct Para_global
-    {
-        /* global parameters */
-        char FP_DAILY[150];     // file path of daily precipitation data (to be disaggregated)
-        char FP_CP[150];        // file path of circulation pattern (CP) classification data series
-        char FP_HOURLY[150];    // file path of hourly precipitation data (as fragments)
-        char FP_OUT[150];       // file path of output(hourly) precipitation from disaggregation
-        char FP_LOG[150];       // file path of log file
-        int N_STATION;          // number of stations (rain sites)
-        char T_CP[10];          // toggle (flag), whether the CP is considered in the algorithm
-        char SEASON[10];        // toggle (flag), whether the seasonality is considered in the algorithm
-        int CONTINUITY;         // continuity day
-        int WD;                 // the flexibility level of wet-dry status in candidates filtering
-    };
-
-/* ---- function declaration ---- */
-// data import functions
-void import_global(char fname[], struct Para_global *p_gp);  // function declaration
-void removeLeadingSpaces(char *str);
-int import_df_cp(
-        char fname[],
-        struct df_cp *p_df_cp
-    );
-int import_dfrr_d(
-        char FP_daily[], 
-        int N_STATION,
-        struct df_rr_d *p_rr_d
-    );  // declare
-int import_dfrr_h(
-        char FP_hourly[], 
-        int N_STATION,
-        struct df_rr_h *p_rr_h
-    );
-
-
-// kNN_MOF_cp algorithm functions
-int Toggle_CONTINUITY(
-        struct df_rr_h *p_rrh,
-        struct df_rr_d *p_rrd,
-        struct Para_global *p_gp,
-        int ndays_h,
-        int pool_cans[],
-        int WD
-    );
-
-int Toogle_CP(
-    struct Date date,
-    struct df_cp *p_cp,
-    int nrow_cp);
-
-int kNN_sampling(
-    struct df_rr_d *p_rrd,
-    struct df_rr_h *p_rrh,
-    struct Para_global *p_gp,
-    int pool_cans[],
-    int n_can);
-
-void Fragment_assign(
-    struct df_rr_h *p_rrh,
-    struct df_rr_h *p_out,
-    struct Para_global *p_gp,
-    int fragment);
-
-void Write_df_rr_h(
-    struct df_rr_h *p_out,
-    struct Para_global *p_gp,
-    FILE *p_FP_OUT);
-
-double get_random(); // declare
-int weight_cdf_sample(
-    int size_pool,
-    int pool_cans[],
-    double *weights_cdf    
-);
-
-void kNN_MOF(
-        struct df_rr_h *p_rrh,
-        struct df_rr_d *p_rrd,
-        struct df_cp *p_cp,
-        struct Para_global *p_gp,
-        int nrow_rr_d,
-        int ndays_h,
-        int nrow_cp
-    );
+FILE *p_log;  // file pointer pointing to log file
 
 /***************************************
  * main function 
@@ -165,18 +38,7 @@ int main(int argc, char * argv[]) {
         this should be the only extern input for this program */
     time_t tm;  //datatype from <time.h>
     time(&tm);
-    struct Para_global Para_df = {
-        "D:/kNN_MOD_cp/data/test_rr_daily.txt",
-        "D:/kNN_MOF_cp/data/test_cp_series.txt",
-        "D:/kNN_MOF_cp/data/test_rr_obs_hourly.txt",
-        "D:/kNN_MOF_cp/output/",
-        "D:/kNN_MOF_cp/my_disaggregation.log",
-        134,
-        "TRUE",
-        "TRUE",
-        1,
-        1
-    };  // define the global-parameter structure and initialization
+    struct Para_global Para_df;  // define the global-parameter structure and initialization
     struct Para_global * p_gp;      // give a pointer to global_parameter structure
     p_gp = &Para_df;
     
@@ -186,7 +48,7 @@ int main(int argc, char * argv[]) {
     argv[1]: pointing to the second string (parameter): file path and name of global parameter file.
     */
     import_global(*(++argv), p_gp);
-    FILE *p_log;  // file pointer pointing to log file
+    
     if ((p_log=fopen(p_gp->FP_LOG, "a+")) == NULL) {
         printf("cannot create / open log file\n");
         exit(1);
@@ -202,14 +64,19 @@ int main(int argc, char * argv[]) {
         p_gp->FP_DAILY, p_gp->FP_HOURLY, p_gp->FP_CP, p_gp->FP_OUT, p_gp->FP_LOG);
 
     printf(
-        "------ Disaggregation parameters: -----\nT_CP: %s\nSEASON: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\n",
-        p_gp->T_CP, p_gp->SEASON, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD
+        "------ Disaggregation parameters: -----\nT_CP: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\nRUN: %d\nSEASON: %s\n",
+        p_gp->T_CP, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD, p_gp->RUN, p_gp->SEASON
     );
     fprintf(
         p_log,
-        "------ Disaggregation parameters: -----\nT_CP: %s\nSEASON: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\n",
-        p_gp->T_CP, p_gp->SEASON, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD
+        "------ Disaggregation parameters: -----\nT_CP: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\nRUN: %d\nSEASON: %s\n",
+        p_gp->T_CP, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD, p_gp->RUN, p_gp->SEASON
     );
+    if (strncmp(p_gp->SEASON, "TRUE", 4) == 0)
+    {
+        printf("SUMMER: %d-%d\n", p_gp->SUMMER_FROM, p_gp->SUMMER_TO);
+        fprintf(p_log,"SUMMER: %d-%d\n", p_gp->SUMMER_FROM, p_gp->SUMMER_TO);
+    }
     /******* import circulation pattern series *********/
     
     static struct df_cp df_cps[MAXrow];
@@ -246,6 +113,12 @@ int main(int argc, char * argv[]) {
         Para_df.N_STATION,
         df_rr_daily
     );
+    initialize_dfrr_d(
+        p_gp,
+        df_rr_daily,
+        df_cps,
+        nrow_rr_d,
+        nrow_cp);
     time(&tm);
     printf("------ Import daily rr data (Done): %s", ctime(&tm)); fprintf(p_log, "------ Import daily rr data (Done): %s", ctime(&tm));
     
@@ -263,13 +136,19 @@ int main(int argc, char * argv[]) {
         "* the last day:  %d-%02d-%02d\n", 
         df_rr_daily[nrow_rr_d-1].date.y,df_rr_daily[nrow_rr_d-1].date.m,df_rr_daily[nrow_rr_d-1].date.d
     );
-    
+    view_class_rrd(df_rr_daily, nrow_rr_d);
+
     /****** import hourly rainfall data (obs as fragments) *******/
     
     int ndays_h;
     static struct df_rr_h df_rr_hourly[MAXrow];
     ndays_h = import_dfrr_h(Para_df.FP_HOURLY, Para_df.N_STATION, df_rr_hourly);
-
+    initialize_dfrr_h(
+        p_gp,
+        df_rr_hourly,
+        df_cps,
+        ndays_h,
+        nrow_cp);
     time(&tm);
     printf("------ Import hourly rr data (Done): %s", ctime(&tm)); fprintf(p_log, "------ Import hourly rr data (Done): %s", ctime(&tm));
     
@@ -287,9 +166,10 @@ int main(int argc, char * argv[]) {
         "* the last day:  %d-%02d-%02d\n", 
         df_rr_hourly[ndays_h-1].date.y, df_rr_hourly[ndays_h-1].date.m, df_rr_hourly[ndays_h-1].date.d
     );
-
-    /****** Disaggregation: kNN_MOF_cp *******/
+    view_class_rrh(df_rr_hourly, ndays_h);
     
+    /****** Disaggregation: kNN_MOF_cp *******/
+    printf("------ Disaggregating: ... \n");
     kNN_MOF(
         df_rr_hourly,
         df_rr_daily,
@@ -304,778 +184,3 @@ int main(int argc, char * argv[]) {
     fprintf(p_log, "------ Disaggregation daily2hourly (Done): %s", ctime(&tm));
     return 0; 
 }
-
-void import_global(
-    char fname[], struct Para_global *p_gp
-){
-    /**************
-     * import the global parameters into memory for disaggregation algorithm
-     * 
-     * -- Parameters:
-     *      fname: a string (1-D character array), file path and name of the global parameters
-     * -- Output:
-     *      return a structure containing the key fields
-     * ********************/
-    
-    char row[MAXCHAR];
-    FILE *fp;
-    char *token;
-    char *token2;
-    int i;
-    
-    if ((fp=fopen(fname, "r")) == NULL) {
-        printf("cannot open global parameter file: %s\n", fname);
-        exit(1);
-    }
-    while (fgets(row, MAXCHAR, fp) != NULL)
-    {
-        // the fgets() function comes from <stdbool.h>
-        // Reads characters from stream and stores them as a C string
-        
-        /***
-         * removeLeadingSpaces():
-         * remove all the leading white spaces in the string if exist,
-         * otherwise do nothing!
-        */
-        removeLeadingSpaces(row);
-
-        if (row != NULL && strlen(row) > 1) {
-            /*non-empty row(string)*/
-            if (row[0] != '#') {
-                /* the first character of row should not be # */
-                for (i = 0; i < strlen(row); i++)
-                {
-                    /* remove (or hide) all the characters after # */
-                    if (row[i] == '#')
-                    {
-                        row[i] = '\0';
-                        break;
-                    }
-                }
-                // puts(row);
-                /*assign the values to the parameter structure: key-value pairs*/
-                token = strtok(row, ",");   // the first column: key
-                token2 = strtok(NULL, ",\r\n");  // the second column: value
-                // printf("token: %s\n", token);
-                if (strncmp(token, "FP_DAILY", 8) == 0) {
-                    strcpy(p_gp->FP_DAILY, token2);
-                } else if (strncmp(token, "FP_CP", 5) == 0) {
-                    strcpy(p_gp->FP_CP, token2);
-                } else if (strncmp(token, "FP_HOURLY", 9) == 0) {
-                    strcpy(p_gp->FP_HOURLY, token2);
-                } else if (strncmp(token, "SEASON", 6) == 0) {
-                    strcpy(p_gp->SEASON, token2);
-                } else if (strncmp(token, "T_CP", 4) == 0) {
-                    strcpy(p_gp->T_CP, token2);
-                } else if (strncmp(token, "N_STATION", 9) == 0) {
-                    p_gp->N_STATION = atoi(token2);
-                } else if (strncmp(token, "WD", 2) == 0) {
-                    p_gp->WD = atoi(token2);
-                } else if (strncmp(token, "FP_OUT", 6) == 0) {
-                    strcpy(p_gp->FP_OUT, token2);
-                } else if (strncmp(token, "FP_LOG",6) == 0) {
-                    strcpy(p_gp->FP_LOG, token2);
-                } else if (strncmp(token, "CONTINUITY", 10) == 0) {
-                    p_gp->CONTINUITY = atoi(token2);   
-                } else {
-                    printf(
-                        "Error in opening global parameter file: unrecognized parameter field!"
-                    );
-                    exit(1);
-                }
-            }
-        }
-    }
-    fclose(fp);
-    
-}
-void removeLeadingSpaces(char *str) {
-    if (str != NULL) {
-        int i, j = 0;
-        int len = strlen(str);
-        // Find the first non-space character
-        for (i = 0; i < len && isspace(str[i]); i++)
-        {
-            // Do nothing, just iterate until the first non-space character is found
-        }
-        // Shift the string to remove leading spaces
-        for (; i < len; i++)
-        {
-            str[j++] = str[i];
-        }
-        // Null-terminate the modified string
-        str[j] = '\0';
-    }
-}
-
-int import_dfrr_d(
-    char FP_daily[], 
-    int N_STATION,
-    struct df_rr_d *p_rr_d
-) {
-    /**************
-     * Main:
-     *  import daily rainfall data (tobe disaggregated) into memory
-     * Parameters: 
-     *  FP_daily: a string, storing the file path and name of daily rr data file
-     *  N_STATION: the number of rainfall stations in disaggrgeation 
-     *  p_rr_d: name of structure df_rr_d array
-     * Return:
-     *  output the number of days (rows)
-     * ****************/
-    // char FP_daily[]="D:/kNN_MOF_cp/data/rr_obs_daily.csv";  // key parameter
-    FILE *fp_d;
-    if ((fp_d=fopen(FP_daily, "r")) == NULL) {
-        printf("Cannot open daily rr data file: %s\n", FP_daily);
-        exit(1);
-    }
-    // struct df_rr_d df_rr_daily[10000];
-    char *token;
-    char row[MAXCHAR];
-    int i, j;
-    i=0;  // record the number of rows in the data file
-    while (fgets(row, MAXCHAR, fp_d) != NULL)
-    {
-        (p_rr_d + i)->date.y = atoi(strtok(row, ","));  //df_rr_daily[i].
-        (p_rr_d + i)->date.m = atoi(strtok(NULL, ","));
-        (p_rr_d + i)->date.d = atoi(strtok(NULL, ","));
-        (p_rr_d + i)->p_rr = (double *)malloc(N_STATION * sizeof(double));
-        
-        for (j=0; j < N_STATION; j++){
-            token = strtok(NULL, ",");
-            *((p_rr_d + i)->p_rr + j) = atof(token);
-        }
-        i++;
-    }
-    fclose(fp_d);
-    return i;
-}
-
-int import_dfrr_h(
-    char FP_hourly[], 
-    int N_STATION,
-    struct df_rr_h *p_rr_h
-) {
-    /**************
-     * Main:
-     *  import hourly rainfall observations into memory
-     * Parameters: 
-     *  FP_hourly: a string, storing the file path and name of hourly rr data file
-     *  N_STATION: the number of rainfall stations in disaggrgeation 
-     *  p_rr_h: name of structure df_rr_h array
-     * Return:
-     *  output the number of hourly observation days
-     * ****************/
-    // char FP_hourly[]="D:/kNN_MOF_cp/data/rr_obs_hourly.csv";
-    FILE *fp_h;
-    if ((fp_h=fopen(FP_hourly, "r")) == NULL) {
-        printf("Cannot open hourly rr data file: %s\n", FP_hourly);
-        exit(1);
-    }
-    char *token;
-    char row[MAXCHAR];
-    int j, h, nrow_total, ndays;
-    int i = 0;
-
-    struct df_rr_h *p_df_rr_h;  // pointer of df_rr_h; for iteration
-    p_df_rr_h = p_rr_h; // initialize
-    while (fgets(row, MAXCHAR, fp_h) != NULL) {
-        if (i%24 == 0) {
-            /* %: remainder after division (modulo division)*/
-            (p_df_rr_h->date).y = atoi(strtok(row, ","));
-            (p_df_rr_h->date).m = atoi(strtok(NULL, ","));
-            (p_df_rr_h->date).d = atoi(strtok(NULL, ","));
-            p_df_rr_h->rr_h = calloc(N_STATION, sizeof(double) * 24);  // allocate memory (stack)
-        } else {
-            // just skip the date (y, m, d)
-            token = strtok(row, ","); token = strtok(NULL, ","); token = strtok(NULL, ",");
-        }
-        h = atoi(strtok(NULL, ","));
-        for (j=0; j < N_STATION; j++){
-            token = strtok(NULL, ",");
-            *(*(p_df_rr_h->rr_h + j) + h) = atof(token);
-        }
-        if (i%24 == 23) {
-            p_df_rr_h++;
-        }
-        i++;
-    }
-    fclose(fp_h);
-    nrow_total = i;  // the total number of row in the data file
-    ndays = p_df_rr_h - p_rr_h;  // the exact size of struct p_rr_h array
-    /**** aggregate the hourly rr into daily scale ****/
-    for (p_df_rr_h = p_rr_h; p_df_rr_h<p_rr_h + ndays; p_df_rr_h++) {
-        p_df_rr_h->rr_d = (double *)malloc(N_STATION*sizeof(double)); // allocate memory (stack)
-        for (j=0;j<N_STATION;j++) {
-            *(p_df_rr_h->rr_d+j) = 0;
-            for (h=0;h<24;h++) {
-                *(p_df_rr_h->rr_d+j) += p_df_rr_h->rr_h[j][h];
-            }
-        }
-    }
-    return ndays; // the last is null
-}
-
-int import_df_cp(
-    char fname[],
-    struct df_cp *p_df_cp
-) {
-    /*********************
-    * Main function:
-    *     import the circulation pattern classification results
-    * Parameters:
-    *     fname: the file path, together with the file name of CP data
-    * Return:
-    *     bring back struct array of cp data to main() function;
-    *     the return value of the function: the number of rows in the data file
-    *********************/
-    FILE *fp_cp;
-    char row[MAXCHAR];
-    char *token;
-    int j = 0;  // from the first row 
-    if ((fp_cp=fopen(fname, "r")) == NULL) {
-        printf("Cannot open cp data file: %s\n", fname);
-        exit(1);
-    }
-    while (fgets(row, MAXCHAR, fp_cp) != NULL)
-    {
-        // the fgets() function comes from <stdbool.h>
-        // Reads characters from stream and stores them as a C string
-        token = strtok(row, ",");  
-        p_df_cp[j].date.y = atoi(token);
-        p_df_cp[j].date.m = atoi(strtok(NULL, ","));
-        p_df_cp[j].date.d = atoi(strtok(NULL, ","));
-        p_df_cp[j].cp = atoi(strtok(NULL, ","));
-        j++;
-    } 
-    fclose(fp_cp);
-    return j;  // the number of rows; the last row is null
-}
-
-void kNN_MOF(
-    struct df_rr_h *p_rrh,
-    struct df_rr_d *p_rrd,
-    struct df_cp *p_cp,
-    struct Para_global *p_gp,
-    int nrow_rr_d,
-    int ndays_h,
-    int nrow_cp
-) {
-    /*******************
-     * Description:
-     *  algorithm: k-nearest neighbouring sampling, method-of-fragments, circulation patterns and (or) seasonality
-     *  scale: daily2hourly, multiple rain gauges simultaneously
-     * Parameters:
-     *  nrow_rr_d: the number of rows in daily rr data file
-     *  ndays_h: the number of observations of hourly rr data
-     *  nrow_cp: the number of rows in cp series
-     * *****************/
-    int i, j, h, k, Toggle_wd;
-    int toggle_cp;
-    int skip=0;
-    struct df_rr_h df_rr_h_out; // this is a struct variable, not a struct array;
-    // struct df_rr_h df_rr_h_candidates[100];
-    // p_gp->CONTINUITY: 1, skip = 0;
-    // p_gp->CONTINUITY: 3, skip = 1;
-    skip = (p_gp->CONTINUITY - 1) / 2;
-    int pool_cans[MAXrow];  // the index of the candidates (a pool); the size is sufficient 
-    int n_cans_c=0;  // the number of candidates after continuity filtering
-    int n_can; //the number of candidates after all conditioning (cp and seasonality)
-    int fragment; // the index of df_rr_h structure with the final chosed fragments
-    
-    FILE *p_FP_OUT;
-    if ((p_FP_OUT=fopen(p_gp->FP_OUT, "w")) == NULL) {
-        printf("Program terminated: cannot create or open output file\n");
-        exit(1);
-    }
-    for (i=skip; i < nrow_rr_d-skip; i++) { //i=skip
-        // iterate each (possible) target day
-        df_rr_h_out.date = (p_rrd + i)->date;
-        df_rr_h_out.rr_d = (p_rrd + i)->p_rr; // is this valid?; address transfer
-        df_rr_h_out.rr_h = calloc(p_gp->N_STATION, sizeof(double) * 24);  // allocate memory (stack);
-        Toggle_wd = 0;  // initialize with 0 (non-rainy)
-        n_cans_c = 0;
-        for (j=0; j < p_gp->N_STATION; j++) {
-            if (*((p_rrd + i)->p_rr + j) > 0.0) {
-                // any gauge with rr > 0.0
-                Toggle_wd = 1;
-                break;
-            }
-        }
-        // printf("Targetday: %d-%d-%d: %d\n", 
-        //     (p_rrd + i)->date.y, (p_rrd + i)->date.m, (p_rrd + i)->date.d, Toggle_wd
-        // );
-        if (Toggle_wd == 0) {
-            // this is a non-rainy day; all 0.0
-            n_can = -1;
-            for (j=0; j<p_gp->N_STATION; j++){
-                for (h=0; h<24; h++) {
-                    df_rr_h_out.rr_h[j][h] = 0.0;
-                }
-            }
-        } else {
-            // Toggle_wd == 1;
-            // this is a rainy day; we will disaggregate it.
-            n_cans_c = Toggle_CONTINUITY(
-                p_rrh,
-                p_rrd + i,  // pointing to the target day struct
-                p_gp,
-                ndays_h,
-                pool_cans,
-                p_gp->WD  // 
-                /****
-                 * WD == 0, strict; 
-                 * wet-dry status vectors match with each other 
-                 *      (candidate and target day) 
-                 *      at multiple rain gauges perfectly.
-                 * typically, WD == 1, flexible in wet-dry status filtering 
-                 */
-            );
-            // printf("number of candidates after continuity filtering (n_cans_c): %d\n", n_cans_c);
-            // printf("WD-0: ncan: %d\n", n_cans_c);
-            if (n_cans_c < 2 && p_gp->WD == 0) {
-                /***
-                 * when the number of candidate days 
-                 *      after strict (WD == 0) wet-dry status filter 
-                 *      is less than 2.
-                 * */ 
-                n_cans_c = Toggle_CONTINUITY(
-                            p_rrh,
-                            p_rrd + i,
-                            p_gp,
-                            ndays_h,
-                            pool_cans,
-                            1 
-                        );
-                // printf("WD-1: ncan: %d\n", n_cans_c);
-            }
-            if (n_cans_c == 0) {
-                printf("the target day %d-%02d-%02d has no matching hourly candidate!\n",
-                       (p_rrd + i)->date.y, (p_rrd + i)->date.m, (p_rrd + i)->date.d);
-                printf("Programm terminated!");
-                exit(2);
-            } else if (n_cans_c == 1) {
-                /**
-                 * only one candidate fits here after wet-dry status filtering 
-                 *      then we just skip other filtering conditions, like
-                 *      CP or seasonality.
-                */
-                fragment = pool_cans[0];
-            } else {
-                // n_cans_c > 1;
-                // candidates filtering based on CP and seasonality
-                n_can=0;
-                for (int t = 0; t < n_cans_c; t++) {
-                    toggle_cp = 0; // initialize the toggle_cp for every iteration
-                    if (strncmp(p_gp->T_CP, "TRUE", 4) == 0) {
-                        // disaggregation conditioned on circulation pattern classification
-                        if (
-                            Toogle_CP( (p_rrh + pool_cans[t])->date, p_cp, nrow_cp ) == Toogle_CP( (p_rrd + i)->date, p_cp, nrow_cp )
-                        ) {
-                            // only continue when target and candidate day share the same cp class.
-                            if (strncmp(p_gp->SEASON, "TRUE", 4) == 0) {
-                                // seasonality: summer and winter
-                                if (
-                                    ((p_rrh + pool_cans[t])->date.m >= 5 && (p_rrh + pool_cans[t])->date.m <= 10) == 
-                                    ((p_rrd + i)->date.m >= 5 && (p_rrd + i)->date.m <= 10) 
-                                ) {
-                                    toggle_cp = 1;
-                                }
-                            } else {
-                                // only cp, without seasonality
-                                toggle_cp = 1;
-                            }
-                        } 
-                    } else {
-                        /***
-                         * p_gp->T_CP != "TRUE": 
-                         *      the disaggregation conditioned only on seasonality (12 months)
-                        */
-                        if (
-                            (p_rrh + pool_cans[t])->date.m == (p_rrd + i)->date.m
-                        ) {
-                            toggle_cp = 1;
-                        }
-                    }
-                    if (toggle_cp == 1) {
-                        // this candidate selected into (final) pool
-                        pool_cans[n_can] = pool_cans[t];  // rewrite pool_cans[] array; t is always >= n_can
-                        n_can++;
-                    }
-                }
-                // printf("number of candidates after all filtering (n_can): %d\n", n_can);
-                /* printf("Candidates: \n");
-                for (int ii = 0; ii < n_can; ii++) {
-                    printf("%d\n", pool_cans[ii]);
-                } */ 
-                /******** filtering is done: *********/
-                if (n_can == 1) {
-                    /***
-                     * after candidates filtering, only one left.
-                    */
-                    fragment = pool_cans[0];
-                } else {
-                    // n_can == 0 or n_can > 1
-                    if (n_can == 0) {
-                        /***
-                         * after cp and seasonality filtering, 
-                         *      there is not candidates any more 
-                         *      (toggle_cp always equals to 0).
-                         *      pool_cans remains unchanged.
-                         * Then we just discard the cp and seasonality filtering
-                         *      in order to make the disaggregation possible.
-                        */
-                        n_can = n_cans_c;
-                    }
-                    /* kNN sampling, based on the qualified candidates pool */
-                    fragment = kNN_sampling(p_rrd+i, p_rrh, p_gp, pool_cans, n_can);
-                }
-                // printf("%d-%d-%d: fragment: %d\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d, fragment);
-            }
-            /*assign the sampled fragments to target day (disaggregation)*/
-            Fragment_assign(p_rrh, &df_rr_h_out, p_gp, fragment);
-        }
-        /* write the disaggregation output */
-        Write_df_rr_h(&df_rr_h_out, p_gp, p_FP_OUT);
-        printf("%d-%02d-%02d: Done!\n", (p_rrd+i)->date.y, (p_rrd+i)->date.m, (p_rrd+i)->date.d);
-        
-        free(df_rr_h_out.rr_h);  // free the memory allocated for disaggregated hourly output
-    }
-    fclose(p_FP_OUT);
-}
-
-int Toggle_CONTINUITY(
-    struct df_rr_h *p_rrh,
-    struct df_rr_d *p_rrd,
-    struct Para_global *p_gp,
-    int ndays_h,
-    int pool_cans[],
-    int WD // Wet-dry status matching: strict:0; flexible:1
-){
-    /*****************
-     * Description:
-     *      wet-dry status continuity matching check
-     * Parameters:
-     *      p_rrh: pointing to df_rr_hourly struct array (all the hourly rr observations);
-     *      p_rrd: pointing to target day (to be disaggregated);
-     *      p_gp: pointing to global parameter struct;
-     *      ndays_h: number of days in hourly rr data;
-     *      pool_cans: the pool of candidate index;
-     *      WD: matching flexcibility, global parameter
-     * Output:
-     *      - the number of candidates (pool size)
-     *      - bring back the pool_cans array
-     * ***************/
-    int i, j, k, skip, toggle_WD;
-    // toggle_WD: whether wet-dry status match; 1: match; 0: not match
-    int n_cans=0;  // number of candidates fullfilling the CONTINUITY criteria (output)
-    skip = (p_gp->CONTINUITY - 1) / 2; // p_gp->CONTINUITY == 1: skip=0; p_gp->CONTINUITY == 3: skip=1
-    
-    for (k=skip; k < ndays_h-skip; k++) { 
-        // iterate each day in hourly observations
-        toggle_WD = 1;
-        for (i=0-skip; i < 1+skip; i++) {
-            // here we have to compare vectors between candidates and target; 
-            //      CONTINUITY=1: skip=0; CONTINUITY=3: skip=1; 
-            for (j=0; j < p_gp->N_STATION; j++){
-                if (WD == 0) {
-                    /*strict wet-dry matching*/
-                    // the wet-dry status in each vector should be completely the same with each other.
-                    if (
-                        !(
-                            ((p_rrd + i)->p_rr[j] > 0.0) == ((p_rrh + k + i)->rr_d[j] > 0.0)
-                        )
-                    ) {
-                        toggle_WD = 0;break;
-                    } else {
-                        continue;
-                    }
-                } else {
-                    // WD == 1
-                    /* flexible wet-dry status matching*/
-                    if (
-                        ((p_rrd + i)->p_rr[j] > 0.0) && ((p_rrh + k + i)->rr_d[j] <= 0.0)
-                    ) {
-                        toggle_WD = 0;break;
-                    }
-                }
-            }
-        }
-        if (toggle_WD == 1) {
-            *(pool_cans + n_cans) = k;
-            n_cans++;
-            // printf("n_cans: %d\n", n_cans);
-        }
-    }
-    return n_cans;
-}
-
-int Toogle_CP(
-    struct Date date,
-    struct df_cp *p_cp,
-    int nrow_cp
-){
-    /*************
-     * Description:
-     *      derive the cp value (class) of the day based on date stamp (y-m-d)
-     * Parameters:
-     *      date: a Date struct, conaining y, m and d
-     *      p_cp: pointing to the cp data struct array
-     *      nrow_cp: total rows of cp observations
-     * Output:
-     *      return the derived cp value
-     * **********/
-    int i;
-    int cp = -1;
-    for (i = 0; i < nrow_cp; i++) {
-        if (
-            (p_cp+i)->date.y == date.y && (p_cp+i)->date.m == date.m && (p_cp+i)->date.d == date.d
-        ) {
-            cp = (p_cp+i)->cp;
-            break; // terminate the loop directly
-        }
-    }
-    if (cp == -1) {
-        printf(
-            "Program terminated: cannot find the cp class for the date %d-%02d-%02d\n",
-            date.y, date.m, date.d
-        );
-        exit(2);
-    }
-    return cp;
-}
-
-int kNN_sampling(
-    struct df_rr_d *p_rrd,
-    struct df_rr_h *p_rrh,
-    struct Para_global *p_gp,
-    int pool_cans[],
-    int n_can
-){
-    /**************
-     * Description:
-     *      - compute the manhattan distance of rr between target and candidate days
-     *      - sort the distance in the increasing order
-     *      - select the sqrt(n_can) largest distance
-     *      - weights defined as inverse of distance
-     *      - sample one distance 
-     * Parameters:
-     *      p_rrd: the target day (structure pointer)
-     *      p_rrh: pointing to the hourly rr obs structure array
-     *      p_gp: pointing to global parameter structure
-     *      pool_cans: the index pool of candidats
-     *      n_can: the number (or size) fo candidates pool
-     * Output:
-     *      return a sampled index (fragments source)
-     * ***********/
-    int i, j;  // iteration variable
-    int temp_c;  // temporary variable during sorting 
-    double temp_d;
-    double rd = 0.0;  // a random decimal value between 0.0 and 1.0
-
-    // double distance[MAXrow]; 
-    double *distance;  // the distance between target day and candidate days
-    distance = malloc(n_can * sizeof(double));
-    int size_pool; // the k in kNN
-    int index_out; // the output of this function: the sampled fragment from candidates pool
-    /**manhattan distance*/
-    for (i=0; i<n_can; i++){
-        *(distance+i) = 0.0;
-        for (j=0; j<p_gp->N_STATION; j++){
-            *(distance+i) += fabs(p_rrd->p_rr[j] - (p_rrh + pool_cans[i])->rr_d[j]);
-        }
-        // printf("candidate index: %d, distance: %.2f\n", pool_cans[i], *(distance+i));
-    }
-    // sort the distance in the increasing order
-    for (i=0; i<n_can-1; i++) {
-        for (j=i+1; j<n_can; j++) {
-            if (distance[i] > distance[j]) {
-                temp_c = pool_cans[i]; pool_cans[i] = pool_cans[j]; pool_cans[j] = temp_c;
-                temp_d = distance[i]; distance[i] = distance[j]; distance[j] = temp_d;
-            }
-        }
-    }
-    /*
-    printf("--------------after sorting---------\n");
-    for (i=0; i<n_can;i++) {
-        printf("candidate index: %d, distance: %.2f\n", pool_cans[i], *(distance+i));
-    }
-    */
-    if (distance[0] <= 0.0) {
-        // the closest candidate with the distance of 0.0, then we skip the weighted sampling.
-        index_out = pool_cans[0];
-    } else {
-        /***
-         * the size of candidate pool in kNN algorithm
-         *      the range of size_pool:
-         *      [2, n_can]
-        */
-        size_pool = (int)sqrt(n_can) + 1; 
-        /***
-         * compute the weights for kNN sampling
-         *      the weight is defined as distance inverse
-         * dynamic memory allocation for the double array - weights
-         * */
-        double *weights;
-        weights = malloc(size_pool * sizeof(double)); // a double array with the size of size_pool
-        double w_sum=0.0; // the sum of the inversed distances
-        for (i=0; i<size_pool; i++){
-            *(weights+i) = 1/distance[i];
-            w_sum += 1/distance[i];
-        }
-        for (i=0; i<size_pool; i++){
-            *(weights+i) /= w_sum; // reassignment
-        }
-        /* compute the empirical cdf for weights (vector) */
-        double *weights_cdf;
-        weights_cdf = malloc(size_pool * sizeof(double));
-        *(weights_cdf + 0) = weights[0];  // initialization
-        for (i=1; i<size_pool; i++){
-            *(weights_cdf + i) = *(weights_cdf + i-1) + weights[i];
-        }
-        /* generate a random number, then an fragments index*/
-        int toggle = 0;
-        while (toggle == 0)
-        {
-            toggle = 1;
-            index_out = weight_cdf_sample(size_pool, pool_cans, weights_cdf);
-            for (j = 0; j < p_gp->N_STATION; j++)
-            {
-                if (p_rrd->p_rr[j] > 0.0 && (p_rrh + index_out)->rr_d[j] <= 0.0)
-                {
-                    toggle = 0;
-                    break;
-                }
-            }
-        }    
-        free(weights);
-        free(weights_cdf);
-    }
-    free(distance);
-    return index_out;
-}
-
-double get_random() { return ((double)rand() / (double)RAND_MAX); }
-int weight_cdf_sample(
-    int size_pool,
-    int pool_cans[],
-    double *weights_cdf    
-) {
-    int i;
-    double rd = 0.0;  // a random decimal value between 0.0 and 1.0
-    int index_out; // the output of this function: the sampled fragment from candidates pool
-
-    // srand(time(NULL)); // randomize seed
-    rd = get_random(); // call the function to get a different value of n every time
-    if (rd <= weights_cdf[0])
-    {
-        index_out = pool_cans[0];
-    }
-    else
-    {
-        for (i = 1; i < size_pool; i++)
-        {
-            if (rd <= weights_cdf[i] && rd > weights_cdf[i - 1])
-            {
-                index_out = pool_cans[i];
-                break;
-            }
-        }
-    }
-    return index_out;
-}
-
-void Fragment_assign(
-    struct df_rr_h *p_rrh,
-    struct df_rr_h *p_out,
-    struct Para_global *p_gp,
-    int fragment
-){
-    /**********
-     * Description:
-     *      disaggregate the target day rainfall into hourly scale based on the selected fragments
-     * Parameters: 
-     *      p_rrh: pointing to the hourly obs rr structure array
-     *      p_out: pointing to the disaggregated hourly rr results struct (to output) 
-     *      p_gp: global parameters struct
-     *      fragment: the index of p_rrh struct after filtering and resampling
-     * Output:
-     *      p_out
-     * *******/
-    int j,h;
-    for (j = 0; j < p_gp->N_STATION; j++)
-    {
-        if (p_out->rr_d[j] > 0.0)
-        {
-            for (h = 0; h < 24; h++)
-            {
-                p_out->rr_h[j][h] = p_out->rr_d[j] * (p_rrh + fragment)->rr_h[j][h] / (p_rrh + fragment)->rr_d[j];
-            }
-        }
-        else
-        {
-            // no rain at the station j
-            for (h = 0; h < 24; h++)
-            {
-                p_out->rr_h[j][h] = 0.0;
-            }
-        }
-    }
-    /*
-    int toggle = 1;
-    for (j=0; j<p_gp->N_STATION;j++) {
-        if (p_out->rr_d[j] > 0.0 && (p_rrh + fragment)->rr_d[j] <= 0.0 ) {
-            toggle = 0;
-            break;
-        }
-    }
-    if (toggle == 1) {
-        for (j=0; j<p_gp->N_STATION; j++) {
-            if (p_out->rr_d[j] > 0.0) {
-                for (h=0; h<24; h++) {
-                    p_out->rr_h[j][h] = p_out->rr_d[j] * (p_rrh + fragment)->rr_h[j][h] / (p_rrh + fragment)->rr_d[j];
-                }
-            } else {
-                // no rain at station j
-                for (h=0; h<24; h++) {p_out->rr_h[j][h] = 0.0;}
-            }
-        }
-    } else {
-        printf("The target day %d-%02d-%02d disaggregation failed, please check or retry!\n---Programm terminated!", 
-            p_out->date.y, p_out->date.m, p_out->date.d);
-        exit(0);
-    } */
-}
-void Write_df_rr_h(
-    struct df_rr_h *p_out,
-    struct Para_global *p_gp,
-    FILE *p_FP_OUT
-){
-    /**************
-     * Description:
-     *      write the disaggregated results into output file (.csv)
-     * Parameters:
-     *      p_gp: 
-     *      p_FP_OUT: a FILE pointer, pointing to the output file
-     * 
-     * ************/
-    int j,h;
-    for (h=0;h<24;h++) {
-        fprintf(
-            p_FP_OUT,
-            "%d,%d,%d,%d,%.3f", 
-            p_out->date.y, p_out->date.m, p_out->date.d, h, 
-            p_out->rr_h[0][h]
-        ); // print the date and time (y, m, d, h), together with the value from first rr gauge (0)
-        
-        for (j=1;j<p_gp->N_STATION;j++){
-            fprintf(
-                p_FP_OUT,
-                ",%.3f", p_out->rr_h[j][h]
-            );
-        }
-        fprintf(p_FP_OUT, "\n"); // print "\n" (newline) after one row
-    }
-    // printf("%d-%d-%d: Done\n", p_out->date.y, p_out->date.m, p_out->date.d); // print to screen (command line)
-}
-
