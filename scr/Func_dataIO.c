@@ -123,6 +123,11 @@ void import_global(
         }
     }
     fclose(fp);
+    if (p_gp->RUN <= 0)
+    {
+        printf("Error: RUN <= 0\n");
+        exit(1);
+    }
 }
 void removeLeadingSpaces(char *str)
 {
@@ -321,11 +326,22 @@ void Write_df_rr_h(
     int j, h;
     for (h = 0; h < 24; h++)
     {
-        fprintf(
-            p_FP_OUT,
-            "%d,%d,%d,%d,%d,%.2f", run,
-            p_out->date.y, p_out->date.m, p_out->date.d, h,
-            p_out->rr_h[0][h]); // print the date and time (y, m, d, h), together with the value from first rr gauge (0)
+        if (p_gp->RUN == 1)
+        {
+            fprintf(
+                p_FP_OUT,
+                "%d,%d,%d,%d,%.2f",
+                p_out->date.y, p_out->date.m, p_out->date.d, h,
+                p_out->rr_h[0][h]); // print the date and time (y, m, d, h), together with the value from first rr gauge (0)
+        }
+        else if (p_gp->RUN > 1)
+        {
+            fprintf(
+                p_FP_OUT,
+                "%d,%d,%d,%d,%d,%.2f", run,
+                p_out->date.y, p_out->date.m, p_out->date.d, h,
+                p_out->rr_h[0][h]); // print the date and time (y, m, d, h), together with the value from first rr gauge (0)
+        }
 
         for (j = 1; j < p_gp->N_STATION; j++)
         {
