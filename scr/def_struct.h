@@ -22,7 +22,7 @@ struct df_rr_d
     struct Date date;    
     double *p_rr;
     int cp;
-    int season;
+    int SM;  // summer [1] or winter [0]
     int class;
 };
 struct df_rr_h
@@ -39,7 +39,7 @@ struct df_rr_h
     double (*rr_h)[24];
     double *rr_d;
     int cp;
-    int season;
+    int SM;  // summer [1] or winter [0]
     int class;
 };
 
@@ -63,6 +63,7 @@ struct Para_global
         char FP_LOG[150];       // file path of log file
         int N_STATION;          // number of stations (rain sites)
         char T_CP[10];          // toggle (flag), whether the CP is considered in the algorithm
+        char MONTH[10];         // toggle (flag), the disaggregation is conditioned on 12 months
         char SEASON[10];        // toggle (flag), whether the seasonality is considered in the algorithm
         int SUMMER_FROM;        // the beginning month of summer
         int SUMMER_TO;          // the end month of summer

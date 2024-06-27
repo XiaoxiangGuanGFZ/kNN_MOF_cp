@@ -8,7 +8,7 @@
 FP_DAILY,D:/kNN_MOF_cp/data/rr_sim_daily.csv
 
 # the file path and name of the circulation pattern classification data
-FP_CP,D:/kNN_MOF_cp/data/cp_series.csv
+FP_CP,D:/kNN_MOF_cp/data/cp.csv
 
 # the file path and name of the observed hourly rainfall data
 FP_HOURLY,D:/kNN_MOF_cp/data/rr_obs_hourly.csv
@@ -24,13 +24,17 @@ N_STATION,134
 
 # T_CP == TRUE: the disaggregation algorithm conditioned on circulation patterns
 # otherwise, on seasonality (12 months) only
-T_CP,TRUE
+T_CP,FALSE
+
+# if MONTH == TRUE, the disaggregation is conditioned on 12 months; SEASON, SUMMER_FROM and SUMMER_TO are deactivated
+# T_CP and MONTH can't be TRUE at the sametime.
+MONTH,TRUE
 
 # SEASON: only valid when T_CP == TRUE; meaning that the disaggregation is conditioned both
 # on cp and seasonality (two seasons: summer and winter)
 # summer: from May to October (5-10)
 # winter: from November to next April (11-4)
-SEASON,TRUE
+SEASON,FALSE
 
 SUMMER_FROM,5
 

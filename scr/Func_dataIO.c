@@ -89,6 +89,10 @@ void import_global(
                 {
                     strcpy(p_gp->T_CP, token2);
                 }
+                else if (strncmp(token, "MONTH", 5) == 0)
+                {
+                    strcpy(p_gp->MONTH, token2);
+                }
                 else if (strncmp(token, "N_STATION", 9) == 0)
                 {
                     p_gp->N_STATION = atoi(token2);

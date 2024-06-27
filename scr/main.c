@@ -64,8 +64,8 @@ int main(int argc, char * argv[]) {
         p_gp->FP_DAILY, p_gp->FP_HOURLY, p_gp->FP_CP, p_gp->FP_OUT, p_gp->FP_LOG);
 
     printf(
-        "------ Disaggregation parameters: -----\nT_CP: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\nRUN: %d\nSEASON: %s\n",
-        p_gp->T_CP, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD, p_gp->RUN, p_gp->SEASON
+        "------ Disaggregation parameters: -----\nT_CP: %s\nMONTH: %s\nN_STATION: %d\nCONTINUITY: %d\nWD: %d\nRUN: %d\nSEASON: %s\n",
+        p_gp->T_CP, p_gp->MONTH, p_gp->N_STATION, p_gp->CONTINUITY, p_gp->WD, p_gp->RUN, p_gp->SEASON
     );
     fprintf(
         p_log,
