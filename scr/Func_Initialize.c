@@ -273,7 +273,7 @@ void view_class_rrd(
     printf("* class-counts:\n   - class: "); fprintf(p_log, "* class-counts:\n   - class: ");
     for (size_t t = 0; t < n_classes; t++)
     {
-        printf("%5d ", t + 1); fprintf(p_log, "%5d ", t + 1);
+        printf("%5ld ", t + 1); fprintf(p_log, "%5ld ", t + 1);
     }
     printf("\n"); fprintf(p_log, "\n");
 
@@ -327,7 +327,7 @@ void view_class_rrh(
     printf("* class-counts:\n   - class: "); fprintf(p_log, "* class-counts:\n   - class: ");
     for (size_t t = 0; t < n_classes; t++)
     {
-        printf("%5d ", t + 1); fprintf(p_log, "%5d ", t + 1);
+        printf("%5ld ", t + 1); fprintf(p_log, "%5ld ", t + 1);
     }
     printf("\n"); fprintf(p_log, "\n");
 
