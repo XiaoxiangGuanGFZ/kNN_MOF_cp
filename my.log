@@ -1,4 +1,4 @@
------- Global parameter import completed: Wed Nov 01 15:49:14 2023
+------ Global parameter import completed: Fri May 10 12:31:04 2024
 FP_DAILY: D:/kNN_MOF_cp/data/rr_sim_daily.csv
 FP_HOULY: D:/kNN_MOF_cp/data/rr_obs_hourly.csv
 FP_CP:    D:/kNN_MOF_cp/data/cp_series.csv
@@ -6,139 +6,105 @@ FP_OUT:   D:/kNN_MOF_cp/output/rr_sim_hourly.csv
 FP_LOG:   D:/kNN_MOF_cp/my.log
 ------ Disaggregation parameters: -----
 T_CP: TRUE
-SEASON: TRUE
 N_STATION: 134
-CONTINUITY: 1
+CONTINUITY: 3
 WD: 1
------- Import CP data series (Done): Wed Nov 01 15:49:14 2023
+RUN: 3
+SEASON: TRUE
+SUMMER: 5-10
+------ Import CP data series (Done): Fri May 10 12:31:04 2024
 * number of CP data rows: 15553
 * the first day: 1979-01-01 
 * the last day:  2021-07-31 
------- Import daily rr data (Done): Wed Nov 01 15:49:14 2023
+------ Import daily rr data (Done): Fri May 10 12:31:05 2024
 * the total rows: 5479
 * the first day: 2006-01-01
 * the last day:  2020-12-31
------- Import hourly rr data (Done): Wed Nov 01 15:49:15 2023
+* class-counts:
+   - class:     1     2     3     4     5     6     7     8     9    10    11    12 
+   - count:   466   419   425   324   416   801   485    89   538   323   389   804 
+------ Import hourly rr data (Done): Fri May 10 12:31:07 2024
 * total hourly obs days: 5479
 * the first day: 2006-01-01
 * the last day:  2020-12-31
------- Global parameter import completed: Wed Nov 01 15:49:38 2023
+* class-counts:
+   - class:     1     2     3     4     5     6     7     8     9    10    11    12 
+   - count:   466   419   425   324   416   801   485    89   538   323   389   804 
+------ Global parameter import completed: Thu Jun 27 13:51:09 2024
 FP_DAILY: D:/kNN_MOF_cp/data/rr_sim_daily.csv
 FP_HOULY: D:/kNN_MOF_cp/data/rr_obs_hourly.csv
-FP_CP:    D:/kNN_MOF_cp/data/cp_series.csv
+FP_CP:    D:/kNN_MOF_cp/data/cp.csv
+FP_OUT:   D:/kNN_MOF_cp/output/rr_sim_hourly.csv
+FP_LOG:   D:/kNN_MOF_cp/my.log
+------ Disaggregation parameters: -----
+T_CP: FALSE
+N_STATION: 134
+CONTINUITY: 3
+WD: 1
+RUN: 3
+SEASON: TRUE
+SUMMER: 5-10
+------ Disaggregation conditioned only on seasonality (12 months): Thu Jun 27 13:51:09 2024
+------ Import daily rr data (Done): Thu Jun 27 13:51:09 2024
+* the total rows: 5479
+* the first day: 2006-01-01
+* the last day:  2020-12-31
+* class-counts:
+   - class:     1     2 
+   - count:  2719  2760 
+------ Import hourly rr data (Done): Thu Jun 27 13:51:11 2024
+* total hourly obs days: 5479
+* the first day: 2006-01-01
+* the last day:  2020-12-31
+* class-counts:
+   - class:     1     2 
+   - count:  2719  2760 
+------ Disaggregation daily2hourly (Done): Thu Jun 27 13:51:36 2024
+------ Global parameter import completed: Thu Jun 27 13:52:53 2024
+FP_DAILY: D:/kNN_MOF_cp/data/rr_sim_daily.csv
+FP_HOULY: D:/kNN_MOF_cp/data/rr_obs_hourly.csv
+FP_CP:    D:/kNN_MOF_cp/data/cp.csv
 FP_OUT:   D:/kNN_MOF_cp/output/rr_sim_hourly.csv
 FP_LOG:   D:/kNN_MOF_cp/my.log
 ------ Disaggregation parameters: -----
 T_CP: TRUE
-SEASON: TRUE
 N_STATION: 134
-CONTINUITY: 1
+CONTINUITY: 3
 WD: 1
------- Import CP data series (Done): Wed Nov 01 15:49:38 2023
-* number of CP data rows: 15553
-* the first day: 1979-01-01 
-* the last day:  2021-07-31 
------- Import daily rr data (Done): Wed Nov 01 15:49:38 2023
+RUN: 3
+SEASON: TRUE
+SUMMER: 5-10
+------ Import CP data series (Done): Thu Jun 27 13:52:53 2024
+* number of CP data rows: 26298
+* the first day: 1950-01-01 
+* the last day:  2021-12-31 
+------ Import daily rr data (Done): Thu Jun 27 13:52:53 2024
 * the total rows: 5479
 * the first day: 2006-01-01
 * the last day:  2020-12-31
------- Import hourly rr data (Done): Wed Nov 01 15:49:39 2023
+* class-counts:
+   - class:     1     2     3     4     5     6     7     8     9    10    11    12 
+   - count:   355   588   394   410   518   454   534   349  1017   325    99   436 
+------ Import hourly rr data (Done): Thu Jun 27 13:52:55 2024
 * total hourly obs days: 5479
 * the first day: 2006-01-01
 * the last day:  2020-12-31
------- Global parameter import completed: Wed Nov 01 15:49:53 2023
+* class-counts:
+   - class:     1     2     3     4     5     6     7     8     9    10    11    12 
+   - count:   355   588   394   410   518   454   534   349  1017   325    99   436 
+------ Disaggregation daily2hourly (Done): Thu Jun 27 13:53:16 2024
+------ Global parameter import completed: Thu Jun 27 13:57:21 2024
 FP_DAILY: D:/kNN_MOF_cp/data/rr_sim_daily.csv
 FP_HOULY: D:/kNN_MOF_cp/data/rr_obs_hourly.csv
-FP_CP:    D:/kNN_MOF_cp/data/cp_series.csv
+FP_CP:    D:/kNN_MOF_cp/data/cp.csv
 FP_OUT:   D:/kNN_MOF_cp/output/rr_sim_hourly.csv
 FP_LOG:   D:/kNN_MOF_cp/my.log
 ------ Disaggregation parameters: -----
-T_CP: TRUE
-SEASON: TRUE
+T_CP: FALSE
 N_STATION: 134
-CONTINUITY: 1
+CONTINUITY: 3
 WD: 1
------- Import CP data series (Done): Wed Nov 01 15:49:53 2023
-* number of CP data rows: 15553
-* the first day: 1979-01-01 
-* the last day:  2021-07-31 
------- Import daily rr data (Done): Wed Nov 01 15:49:53 2023
-* the total rows: 5479
-* the first day: 2006-01-01
-* the last day:  2020-12-31
------- Import hourly rr data (Done): Wed Nov 01 15:49:55 2023
-* total hourly obs days: 5479
-* the first day: 2006-01-01
-* the last day:  2020-12-31
------- Global parameter import completed: Fri Nov 03 08:20:44 2023
-FP_DAILY: D:/kNN_MOF_cp/data/rr_sim_daily.csv
-FP_HOULY: D:/kNN_MOF_cp/data/rr_obs_hourly.csv
-FP_CP:    D:/kNN_MOF_cp/data/cp_series.csv
-FP_OUT:   D:/kNN_MOF_cp/output/rr_sim_hourly.csv
-FP_LOG:   D:/kNN_MOF_cp/my.log
------- Disaggregation parameters: -----
-T_CP: TRUE
+RUN: 3
 SEASON: TRUE
-N_STATION: 134
-CONTINUITY: 1
-WD: 1
------- Import CP data series (Done): Fri Nov 03 08:20:44 2023
-* number of CP data rows: 15553
-* the first day: 1979-01-01 
-* the last day:  2021-07-31 
------- Import daily rr data (Done): Fri Nov 03 08:20:44 2023
-* the total rows: 5479
-* the first day: 2006-01-01
-* the last day:  2020-12-31
------- Import hourly rr data (Done): Fri Nov 03 08:20:45 2023
-* total hourly obs days: 5479
-* the first day: 2006-01-01
-* the last day:  2020-12-31
------- Global parameter import completed: Mon Nov 06 10:04:59 2023
-FP_DAILY: D:/kNN_MOF_cp/data/rr_sim_daily.csv
-FP_HOULY: D:/kNN_MOF_cp/data/rr_obs_hourly.csv
-FP_CP:    D:/kNN_MOF_cp/data/cp_series.csv
-FP_OUT:   D:/kNN_MOF_cp/output/rr_sim_hourly.csv
-FP_LOG:   D:/kNN_MOF_cp/my.log
------- Disaggregation parameters: -----
-T_CP: TRUE
-SEASON: TRUE
-N_STATION: 134
-CONTINUITY: 1
-WD: 1
------- Import CP data series (Done): Mon Nov 06 10:04:59 2023
-* number of CP data rows: 15553
-* the first day: 1979-01-01 
-* the last day:  2021-07-31 
------- Import daily rr data (Done): Mon Nov 06 10:05:00 2023
-* the total rows: 5479
-* the first day: 2006-01-01
-* the last day:  2020-12-31
------- Import hourly rr data (Done): Mon Nov 06 10:05:01 2023
-* total hourly obs days: 5479
-* the first day: 2006-01-01
-* the last day:  2020-12-31
------- Global parameter import completed: Mon Nov 06 10:19:48 2023
-FP_DAILY: D:/kNN_MOF_cp/data/rr_sim_daily.csv
-FP_HOULY: D:/kNN_MOF_cp/data/rr_obs_hourly.csv
-FP_CP:    D:/kNN_MOF_cp/data/cp_series.csv
-FP_OUT:   D:/kNN_MOF_cp/output/rr_sim_hourly.csv
-FP_LOG:   D:/kNN_MOF_cp/my.log
------- Disaggregation parameters: -----
-T_CP: TRUE
-SEASON: TRUE
-N_STATION: 134
-CONTINUITY: 1
-WD: 1
------- Import CP data series (Done): Mon Nov 06 10:19:48 2023
-* number of CP data rows: 15553
-* the first day: 1979-01-01 
-* the last day:  2021-07-31 
------- Import daily rr data (Done): Mon Nov 06 10:19:48 2023
-* the total rows: 5479
-* the first day: 2006-01-01
-* the last day:  2020-12-31
------- Import hourly rr data (Done): Mon Nov 06 10:19:49 2023
-* total hourly obs days: 5479
-* the first day: 2006-01-01
-* the last day:  2020-12-31
+SUMMER: 5-10
+------ Disaggregation conditioned only on seasonality (12 months): Thu Jun 27 13:57:21 2024
