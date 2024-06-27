@@ -13,17 +13,7 @@ circulation patterns are divided on the basis of daily values of the mean sea-le
 The classification is conducted using the objective classification algorithm SANDRA (Simulated ANnealing and Diversified RAndomization) (Philipp et al., 2007). It is based on k-means and minimizes the within-cluster variance of the Euclidian distance between the cluster elements and the cluster centroid. 
 ## 3. How to use
 ### 3.1 Compile and run
-#### 3.1.1 single-file version
 - the program is written in c, with the compiler: gcc version 6.3.0 (MinGW.org GCC-6.3.0-1)
-- to compile (in the command line / PowerShell with the path changed): `gcc ./scr/main.c`
-- an executable application is generated: `a.exe`
-- execute in command line again to run the programm: `./scr/a.exe ./data/global_para.txt`
-- attention: do not forget the file path for both a.exe and parameter file
-
-#### 3.1.2 multi-file version
-- the algorithm is the same, just spliting the `main.c` into separate c source code files for better code organization and maintainability.
-- c source code files include: `main_dis.c`, `def_struct.h`, `Func_dataIO.c` and `Func_kNN_MOF_cp.c`
-- to compile (in PowerShell): `gcc main_dis.c Func_dataIO.c Func_kNN_MOF_cp.c`; `a.exe` will be produced and can be used as normal. 
 - or CMake method: `CMakeLists.txt` is composed first and then call cmake tool `cmake -G "MinGW Makefiles" .` to generate the necessary build files (one of them is `Makefile`), at last call `mingw32-make` to produce the executable app `kNN_MOF_cp.exe` (the name specified in `CMakeLists.txt`)
 - CMake tool can be found in https://cmake.org/, the generator I used here is still provided by MinGW, should be adapted according to specific(your) environments.
 
