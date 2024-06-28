@@ -14,13 +14,12 @@ The classification is conducted using the objective classification algorithm SAN
 ## 3. How to use
 ### 3.1 Compile and run
 - the program is written in c, with the compiler: gcc version 6.3.0 (MinGW.org GCC-6.3.0-1)
-- or CMake method: `CMakeLists.txt` is composed first and then call cmake tool `cmake -G "MinGW Makefiles" .` to generate the necessary build files (one of them is `Makefile`), at last call `mingw32-make` to produce the executable app `kNN_MOF_cp.exe` (the name specified in `CMakeLists.txt`)
-- CMake tool can be found in https://cmake.org/, the generator I used here is still provided by MinGW, should be adapted according to specific(your) environments.
+- CMake method: nevigate to the `scr` folder and you can find `CMakeLists.txt` file there and then call cmake tool `cmake .` to generate the necessary build files (one of them is `Makefile`), at last call `make` to produce the executable app `kNN_MOF_cp.exe` (the name specified in `CMakeLists.txt`)
+- `./kNN_MOF_cp.exe path/to/gp.txt` to run the disaggregation. 
 
 ### 3.2 Global parameter file
-`global_para.txt` provides the key information controlling main behaviors of kNN_MOF_cp disaggregation, including file path and algorithm parameters.
-Detailed comments and explanation can be found in the example file `./data/global_para.txt`.
-Lines starting with the letter # are comment (invalid) lines.
+`gp.txt` provides the key parameters controlling behaviors of kNN_MOF_cp disaggregation, including file path and algorithm parameters. Detailed comments and explanation can be found in the example file `./data/gp.txt`.
+Lines starting with the letter # are comment lines, ignored by the program.
 
 ### 3.3 Multiple runs
 After compiling the programm, the generated executable application can be called from other portal (for instance Matlab, R or Python). Therefore, the disaggregation can be conducted for multiple times for the same or different inputs (daily rr data) by tailoring  `global_para.txt`.
